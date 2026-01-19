@@ -40,8 +40,13 @@ const CCACoins = () => {
   const [strategySlide, setStrategySlide] = useState(0);
   const [techSlide, setTechSlide] = useState(0);
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [isMuted, setIsMuted] = useState(true); // Start muted to avoid autoplay issues
+  const [isMuted, setIsMuted] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Bitcoin presentation states
+  const [bitcoinHalvingSlide, setBitcoinHalvingSlide] = useState(0);
+  const [visibleItems, setVisibleItems] = useState(0);
+  const [visibleNodes, setVisibleNodes] = useState(0);
   const audioRef = useRef(null);
 
   const directLevels = [
@@ -159,16 +164,54 @@ const CCACoins = () => {
     }
   ];
 
+  // Bitcoin halving data
+  const halvingData = [
+    { year: 2008, btc: '50 BTC' },
+    { year: 2012, btc: '25 BTC' },
+    { year: 2016, btc: '12.50 BTC' },
+    { year: 2020, btc: '6.25 BTC' },
+    { year: 2024, btc: '3.125 BTC' }
+  ];
+
+  const nodes = [
+    { id: 1, year: '2011', price: '$3 to $30', halving: false, x: 4, y: 85 },
+    { id: 2, year: '2012', price: '(Halving)', halving: true, x: 18, y: 70 },
+    { id: 3, year: '2013', price: '$1000', halving: false, x: 26, y: 50 },
+    { id: 4, year: '2015', price: '$220', halving: false, x: 34, y: 85 },
+    { id: 5, year: '2016', price: '(Halving)', halving: true, x: 42, y: 63 },
+    { id: 6, year: 2017, price: '$19000', halving: false, x: 50, y: 30 },
+    { id: 7, year: 2019, price: '$3500', halving: false, x: 58, y: 85 },
+    { id: 8, year: 2020, price: '(Halving)', halving: true, x: 66, y: 56 },
+    { id: 9, year: 2021, price: '$69000', halving: false, x: 74, y: 18 },
+    { id: 10, year: 2023, price: '$17000', halving: false, x: 82, y: 85 },
+    { id: 11, year: 2024, price: '(Halving)', halving: true, x: 88, y: 50 },
+    { id: 12, year: 2025, price: '$126000', halving: false, x: 94, y: 10 },
+    { id: 13, year: 2027, price: '?', halving: false, x: 96, y: 85 }
+  ];
+
+  const connections = [
+    [1, 2], [2, 3], [3, 4], [4, 5], [5, 6],
+    [6, 7], [7, 8], [8, 9], [9, 10], [10, 11],
+    [11, 12], [12, 13]
+  ];
+
+  // Navigation functions
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % 5); // 5 slides now
+    setCurrentSlide((prev) => (prev + 1) % 6);
     setStrategySlide(0);
     setTechSlide(0);
+    setBitcoinHalvingSlide(0);
+    setVisibleItems(0);
+    setVisibleNodes(0);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + 5) % 5); // 5 slides now
+    setCurrentSlide((prev) => (prev - 1 + 6) % 6);
     setStrategySlide(0);
     setTechSlide(0);
+    setBitcoinHalvingSlide(0);
+    setVisibleItems(0);
+    setVisibleNodes(0);
   };
 
   const nextStrategy = () => {
@@ -203,6 +246,51 @@ const CCACoins = () => {
     }, 300);
   };
 
+  // Bitcoin halving functions
+  const nextBitcoinHalvingSlide = () => {
+    setBitcoinHalvingSlide((prev) => (prev + 1) % 2);
+  };
+
+  const prevBitcoinHalvingSlide = () => {
+    setBitcoinHalvingSlide((prev) => (prev - 1 + 2) % 2);
+  };
+
+  const handleBitcoinNext = () => {
+    if (bitcoinHalvingSlide === 0) {
+      if (visibleItems < halvingData.length) {
+        setVisibleItems(prev => prev + 1);
+      } else {
+        setVisibleItems(0);
+      }
+    } else if (bitcoinHalvingSlide === 1) {
+      if (visibleNodes < nodes.length) {
+        setVisibleNodes(prev => prev + 1);
+      } else {
+        setVisibleNodes(0);
+      }
+    }
+  };
+
+  const handleBitcoinReset = () => {
+    if (bitcoinHalvingSlide === 0) {
+      setVisibleItems(0);
+    } else if (bitcoinHalvingSlide === 1) {
+      setVisibleNodes(0);
+    }
+  };
+
+  const goToBitcoinHalvingSlide = (slideNum) => {
+    setBitcoinHalvingSlide(slideNum);
+    setVisibleItems(0);
+    setVisibleNodes(0);
+  };
+
+  const isConnectionVisible = (conn) => {
+    return visibleNodes >= conn[1];
+  };
+
+  const getNode = (id) => nodes.find(n => n.id === id);
+
   const toggleMute = () => {
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
@@ -211,12 +299,10 @@ const CCACoins = () => {
       if (newMutedState) {
         audioRef.current.pause();
       } else {
-        // Create a promise chain to handle autoplay
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch(err => {
             console.log('Audio play failed:', err);
-            // Auto-mute if play fails
             setIsMuted(true);
           });
         }
@@ -225,7 +311,7 @@ const CCACoins = () => {
   };
 
   const audioFile = '/audio/Inspiring and Uplifting Background Music For Videos & Presentations.mp3';
-  const logoPath = '/audio/logo.png';
+  const logoPath = '/audio/logo.png'; // Fixed logo path
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 text-white overflow-hidden relative">
@@ -588,7 +674,276 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 4 - Thank You Page */}
+          {/* Slide 4 - Bitcoin Halving Chart */}
+          <div className="min-w-full h-full flex items-center justify-center p-3 sm:p-4 md:p-6">
+            <div className="w-full max-w-4xl relative z-10">
+              {/* Slide Indicator */}
+              <div className="flex justify-center gap-2 mb-4">
+                {[0, 1].map((i) => (
+                  <div
+                    key={i}
+                    className={`h-2 w-16 rounded-full transition-all duration-300 ${
+                      bitcoinHalvingSlide === i ? 'bg-amber-500' : 'bg-amber-500/30'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="bg-slate-800/50 backdrop-blur-lg rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl border-2 border-amber-500/30">
+                
+                {/* Bitcoin Halving Chart */}
+                {bitcoinHalvingSlide === 0 && (
+                  <div className="transition-opacity duration-500">
+                    <div className="flex justify-center mb-2">
+                      <img 
+                        src={logoPath} 
+                        alt="CCA Logo" 
+                        className="h-10 sm:h-12 md:h-16 w-auto object-contain"
+                      />
+                    </div>
+
+                    <div className="text-center mb-3 sm:mb-4">
+                      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent mb-1">
+                        Bitcoin Halving Chart
+                      </h1>
+                      <p className="text-xs sm:text-sm text-amber-200">
+                        Click to reveal the Bitcoin halving timeline
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+                      {halvingData.map((item, index) => (
+                        <div
+                          key={item.year}
+                          className={`transform transition-all duration-700 ${
+                            index < visibleItems
+                              ? 'opacity-100 translate-y-0 scale-100'
+                              : 'opacity-0 translate-y-8 scale-95'
+                          }`}
+                        >
+                          <div className="relative group">
+                            <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-lg blur-sm opacity-40 group-hover:opacity-60 transition-all duration-500"></div>
+                            
+                            <div className="relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur rounded-lg p-1.5 sm:p-2 md:p-2.5 border-2 border-amber-500/50 hover:border-amber-400/70 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30">
+                              <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
+                                <div className="flex-shrink-0">
+                                  <div className="bg-gradient-to-r from-amber-600 to-yellow-600 px-2 sm:px-2.5 md:px-3 py-0.5 sm:py-1 rounded-md border-2 border-amber-400/50 shadow-lg">
+                                    <span className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-slate-900 whitespace-nowrap">
+                                      {item.year}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex-shrink-0">
+                                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                  </svg>
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <div className="bg-gradient-to-r from-yellow-600/30 to-amber-600/30 backdrop-blur-sm px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-md border-2 border-yellow-400/50 text-center shadow-lg">
+                                    <span className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tracking-wide">
+                                      {item.btc}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 sm:mt-4 mb-3 sm:mb-4">
+                      <div className="flex justify-center gap-1 sm:gap-1.5">
+                        {halvingData.map((_, index) => (
+                          <div
+                            key={index}
+                            className={`h-1 sm:h-1.5 rounded-full transition-all duration-500 ${
+                              index < visibleItems
+                                ? 'w-5 sm:w-6 bg-gradient-to-r from-amber-500 to-yellow-500'
+                                : 'w-1 sm:w-1.5 bg-amber-500/30'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-center mt-1.5 sm:mt-2 text-xs sm:text-sm text-amber-300 font-semibold">
+                        {visibleItems} of {halvingData.length} halvings revealed
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bitcoin Pattern Graph */}
+                {bitcoinHalvingSlide === 1 && (
+                  <div className="transition-opacity duration-500">
+                    <div className="flex justify-center mb-1 sm:mb-2">
+                      <img 
+                        src={logoPath} 
+                        alt="CCA Logo" 
+                        className="h-10 sm:h-12 md:h-16 w-auto object-contain"
+                      />
+                    </div>
+
+                    <div className="text-center mb-2">
+                      <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-amber-400 mb-1">
+                        Bitcoin Pattern Graph
+                      </h1>
+                      <p className="text-xs sm:text-sm text-amber-300/80">
+                        Reveal Bitcoin's historical pattern
+                      </p>
+                    </div>
+                    
+                    <div className="relative w-full bg-slate-900/50 rounded-lg border-2 border-amber-500/30 mb-2" style={{ height: 'calc(100vh - 380px)', minHeight: '400px', maxHeight: '600px' }}>
+                      <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                          <filter id="glow">
+                            <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
+                            <feMerge>
+                              <feMergeNode in="coloredBlur"/>
+                              <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                          </filter>
+                        </defs>
+
+                        {connections.map((conn, idx) => {
+                          if (!isConnectionVisible(conn)) return null;
+                          const from = getNode(conn[0]);
+                          const to = getNode(conn[1]);
+                          return (
+                            <line
+                              key={`line-${idx}`}
+                              x1={from.x}
+                              y1={from.y}
+                              x2={to.x}
+                              y2={to.y}
+                              stroke="#f59e0b"
+                              strokeWidth="0.5"
+                              strokeLinecap="round"
+                              style={{
+                                strokeDasharray: 150,
+                                strokeDashoffset: 150,
+                                animation: 'drawLine 0.5s ease-out forwards'
+                              }}
+                            />
+                          );
+                        })}
+
+                        {nodes.map((node, idx) => {
+                          if (idx >= visibleNodes) return null;
+                          
+                          const isTop = node.y < 50;
+                          const isLongText = node.price.length > 8;
+                          const isVeryLongText = node.price.includes('to');
+                          
+                          return (
+                            <g key={node.id}>
+                              <circle cx={node.x} cy={node.y} r="3" fill={node.halving ? '#f59e0b' : '#fbbf24'} opacity="0.4" />
+                              <circle cx={node.x} cy={node.y} r="2" fill={node.halving ? '#f59e0b' : '#1e293b'} stroke={node.halving ? '#fbbf24' : '#f59e0b'} strokeWidth="0.5" filter="url(#glow)" />
+                              <circle cx={node.x} cy={node.y} r="0.6" fill="#fbbf24" />
+
+                              <rect x={node.x - 6.5} y={isTop ? node.y - 10 : node.y + 4} width="13" height="5.5" fill="#0f172a" opacity="0.95" rx="1" />
+                              <text x={node.x} y={isTop ? node.y - 5.8 : node.y + 8} textAnchor="middle" dominantBaseline="middle" fill="#fbbf24" fontWeight="700" fontSize="4.5" fontFamily="Arial, sans-serif">
+                                {node.year}
+                              </text>
+
+                              <rect x={node.x - (isVeryLongText ? 11 : isLongText ? 10 : node.price === '?' ? 3 : 8)} y={isTop ? node.y + 4 : node.y - 10} width={isVeryLongText ? 22 : isLongText ? 20 : node.price === '?' ? 6 : 16} height="5.5" fill="#0f172a" opacity="0.95" rx="1" />
+                              <text x={node.x} y={isTop ? node.y + 8 : node.y - 5.8} textAnchor="middle" dominantBaseline="middle" fill={node.halving ? '#fbbf24' : '#ffffff'} fontWeight={node.halving ? '700' : '600'} fontSize={isVeryLongText ? '3.0' : isLongText ? '3.5' : node.price === '?' ? '5' : '4.0'} fontFamily="Arial, sans-serif">
+                                {node.price}
+                              </text>
+                            </g>
+                          );
+                        })}
+                      </svg>
+                    </div>
+
+                    <div className="space-y-2 mb-2">
+                      <div className="flex justify-center gap-1.5">
+                        {nodes.map((_, idx) => (
+                          <div
+                            key={idx}
+                            className={`h-1.5 rounded-full transition-all duration-500 ${
+                              idx < visibleNodes ? 'w-6 bg-gradient-to-r from-amber-500 to-yellow-500' : 'w-1.5 bg-amber-500/30'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-center text-xs text-amber-300/70">
+                        {visibleNodes} of {nodes.length} nodes
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Navigation Buttons */}
+                <div className="space-y-2">
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() => goToBitcoinHalvingSlide(bitcoinHalvingSlide - 1)}
+                      disabled={bitcoinHalvingSlide === 0}
+                      className={`px-4 py-2 text-sm font-semibold rounded-lg border-2 bg-slate-700/50 text-amber-400 border-amber-500/30 transition-all duration-300 transform ${bitcoinHalvingSlide === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-600/50 hover:border-amber-400/50 hover:scale-105 active:scale-95'}`}
+                    >
+                      ← Previous
+                    </button>
+                    <button
+                      onClick={() => goToBitcoinHalvingSlide(bitcoinHalvingSlide + 1)}
+                      disabled={bitcoinHalvingSlide === 1}
+                      className={`px-4 py-2 text-sm font-semibold rounded-lg border-2 bg-slate-700/50 text-amber-400 border-amber-500/30 transition-all duration-300 transform ${bitcoinHalvingSlide === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-600/50 hover:border-amber-400/50 hover:scale-105 active:scale-95'}`}
+                    >
+                      Next →
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 justify-center">
+                    <button
+                      onClick={handleBitcoinNext}
+                      className="w-full sm:w-auto px-4 sm:px-5 py-1.5 sm:py-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900 text-sm sm:text-base font-semibold rounded-lg shadow-lg hover:shadow-xl hover:shadow-amber-500/50 transition-all duration-300 transform hover:scale-105 active:scale-95"
+                    >
+                      {(bitcoinHalvingSlide === 0 && visibleItems === 0) || (bitcoinHalvingSlide === 1 && visibleNodes === 0) 
+                        ? 'Start' 
+                        : (bitcoinHalvingSlide === 0 && visibleItems < halvingData.length) || (bitcoinHalvingSlide === 1 && visibleNodes < nodes.length)
+                        ? 'Next' 
+                        : 'Restart'}
+                    </button>
+                    
+                    {((bitcoinHalvingSlide === 0 && visibleItems > 0) || (bitcoinHalvingSlide === 1 && visibleNodes > 0)) && (
+                      <button
+                        onClick={handleBitcoinReset}
+                        className="w-full sm:w-auto px-4 sm:px-5 py-1.5 sm:py-2 bg-slate-700/50 hover:bg-slate-600/50 text-amber-400 text-sm sm:text-base font-semibold rounded-lg border-2 border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 transform hover:scale-105 active:scale-95"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Manual Navigation Arrows */}
+              <div className="flex justify-between items-center mt-4">
+                <button
+                  onClick={() => goToBitcoinHalvingSlide(bitcoinHalvingSlide > 0 ? bitcoinHalvingSlide - 1 : 1)}
+                  className="p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-full border-2 border-amber-500/50 hover:border-amber-400 transition-all duration-300 shadow-lg hover:shadow-amber-500/30 transform hover:scale-110 active:scale-95"
+                  aria-label="Previous Slide"
+                >
+                  <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={() => goToBitcoinHalvingSlide(bitcoinHalvingSlide < 1 ? bitcoinHalvingSlide + 1 : 0)}
+                  className="p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-full border-2 border-amber-500/50 hover:border-amber-400 transition-all duration-300 shadow-lg hover:shadow-amber-500/30 transform hover:scale-110 active:scale-95"
+                  aria-label="Next Slide"
+                >
+                  <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Slide 5 - Thank You Page */}
           <div className="min-w-full h-full flex items-center justify-center px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative overflow-y-auto">
             <div className="w-full max-w-xs sm:max-w-2xl md:max-w-3xl relative z-10">
               {/* Floating Icons Background */}
@@ -791,6 +1146,10 @@ const CCACoins = () => {
         @keyframes icon-pulse {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.15); }
+        }
+
+        @keyframes drawLine {
+          to { stroke-dashoffset: 0; }
         }
 
         .animate-blob {
