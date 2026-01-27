@@ -429,7 +429,7 @@ const CCACoins = () => {
                     className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain drop-shadow-lg"
                   />
                   <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent tracking-tight">
-                    CCA COINS
+                    CCA COIN
                   </h1>
                 </div>
                 
