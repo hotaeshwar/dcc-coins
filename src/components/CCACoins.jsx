@@ -982,7 +982,7 @@ const CCACoins = () => {
                 {/* Subtext */}
                 <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-300 font-semibold mb-4 sm:mb-6 md:mb-8 animate-fade-in animation-delay-600 px-4">
                   <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
-                    For Choosing CCA Coins
+                    For Choosing CCA Coin
                   </span>
                 </p>
 
