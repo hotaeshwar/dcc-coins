@@ -60,6 +60,7 @@ const CCACoins = () => {
   const [childAutoPlaying, setChildAutoPlaying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [isChildAnimationComplete, setIsChildAnimationComplete] = useState(true);
   
   const audioRef = useRef(null);
   const autoPlayTimerRef = useRef(null);
@@ -275,6 +276,7 @@ const CCACoins = () => {
       if (nextSlide === 5) {
         resetChildStates();
       }
+      setIsChildAnimationComplete(true);
       return nextSlide;
     });
   };
@@ -285,6 +287,7 @@ const CCACoins = () => {
       if (prevSlideNum === 5) {
         resetChildStates();
       }
+      setIsChildAnimationComplete(true);
       return prevSlideNum;
     });
   };
@@ -294,6 +297,7 @@ const CCACoins = () => {
     if (slideIndex !== 2 && slideIndex !== 3 && slideIndex !== 4) {
       resetChildStates();
     }
+    setIsChildAnimationComplete(true);
   };
 
   const resetChildStates = () => {
@@ -303,12 +307,20 @@ const CCACoins = () => {
     setVisibleItems(0);
     setVisibleNodes(0);
     setChildAutoPlaying(false);
+    setIsChildAnimationComplete(true);
   };
 
   const nextStrategy = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setStrategySlide((prev) => (prev + 1) % strategies.length);
+      setStrategySlide((prev) => {
+        const next = (prev + 1) % strategies.length;
+        // If we're at the last strategy, mark animation as complete
+        if (next === 0) {
+          setIsChildAnimationComplete(true);
+        }
+        return next;
+      });
       setIsTransitioning(false);
     }, 300);
   };
@@ -324,7 +336,14 @@ const CCACoins = () => {
   const nextTech = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setTechSlide((prev) => (prev + 1) % technologies.length);
+      setTechSlide((prev) => {
+        const next = (prev + 1) % technologies.length;
+        // If we're at the last technology, mark animation as complete
+        if (next === 0) {
+          setIsChildAnimationComplete(true);
+        }
+        return next;
+      });
       setIsTransitioning(false);
     }, 300);
   };
@@ -338,29 +357,50 @@ const CCACoins = () => {
   };
 
   const nextBitcoinSlide = () => {
-    setBitcoinSlide((prev) => (prev + 1) % 2);
-    setVisibleItems(0);
-    setVisibleNodes(0);
+    setBitcoinSlide((prev) => {
+      const next = (prev + 1) % 2;
+      setVisibleItems(0);
+      setVisibleNodes(0);
+      setIsChildAnimationComplete(false);
+      return next;
+    });
   };
 
   const prevBitcoinSlide = () => {
     setBitcoinSlide((prev) => (prev - 1 + 2) % 2);
     setVisibleItems(0);
     setVisibleNodes(0);
+    setIsChildAnimationComplete(false);
   };
 
   const handleBitcoinNext = () => {
     if (bitcoinSlide === 0) {
       if (visibleItems < halvingData.length) {
-        setVisibleItems(prev => prev + 1);
+        setVisibleItems(prev => {
+          const newValue = prev + 1;
+          if (newValue >= halvingData.length) {
+            // If we've shown all items, mark as complete
+            setIsChildAnimationComplete(true);
+          }
+          return newValue;
+        });
       } else {
         setVisibleItems(0);
+        setIsChildAnimationComplete(true);
       }
     } else if (bitcoinSlide === 1) {
       if (visibleNodes < nodes.length) {
-        setVisibleNodes(prev => prev + 1);
+        setVisibleNodes(prev => {
+          const newValue = prev + 1;
+          if (newValue >= nodes.length) {
+            // If we've shown all nodes, mark as complete
+            setIsChildAnimationComplete(true);
+          }
+          return newValue;
+        });
       } else {
         setVisibleNodes(0);
+        setIsChildAnimationComplete(true);
       }
     }
   };
@@ -371,6 +411,7 @@ const CCACoins = () => {
     } else if (bitcoinSlide === 1) {
       setVisibleNodes(0);
     }
+    setIsChildAnimationComplete(true);
   };
 
   const isConnectionVisible = (conn) => {
@@ -404,33 +445,45 @@ const CCACoins = () => {
     
     if (!newPlayingState) {
       setChildAutoPlaying(false);
+      setIsChildAnimationComplete(true);
     }
   };
 
   const toggleChildAutoPlay = () => {
     const newChildPlayingState = !childAutoPlaying;
     setChildAutoPlaying(newChildPlayingState);
+    // When starting child auto play, reset completion flag
+    if (newChildPlayingState) {
+      setIsChildAnimationComplete(false);
+    }
   };
 
-  // Main auto play logic - FIXED to wait for child completion
+  // Main auto play logic - FIXED
   useEffect(() => {
     if (isPlaying) {
-      // Clear existing timer
-      if (autoPlayTimerRef.current) {
-        clearInterval(autoPlayTimerRef.current);
-      }
-      
       autoPlayTimerRef.current = setInterval(() => {
-        // Check if we're on a slide with child nav and if child auto play is active
+        // Check if we're on a slide with child nav
         const currentSlideData = slides[currentSlide];
-        if (currentSlideData.hasChildNav && childAutoPlaying) {
-          // Don't advance main slide while child auto play is active
-          return;
-        }
         
-        // Otherwise, proceed to next slide
-        nextSlide();
-      }, 15000);
+        if (currentSlideData.hasChildNav) {
+          // If slide has child content and child autoplay is on
+          if (childAutoPlaying) {
+            // Child autoplay is active, wait for it to complete
+            if (isChildAnimationComplete) {
+              // Child animation is complete, move to next slide
+              nextSlide();
+            }
+            // If child animation not complete, do nothing (wait)
+          } else {
+            // Slide has child content but child autoplay is off
+            // Move to next slide after main slide duration
+            nextSlide();
+          }
+        } else {
+          // Slide doesn't have child content, move to next slide
+          nextSlide();
+        }
+      }, 15000); // 15 seconds per main slide
     } else if (autoPlayTimerRef.current) {
       clearInterval(autoPlayTimerRef.current);
     }
@@ -440,13 +493,16 @@ const CCACoins = () => {
         clearInterval(autoPlayTimerRef.current);
       }
     };
-  }, [isPlaying, currentSlide, childAutoPlaying]);
+  }, [isPlaying, currentSlide, childAutoPlaying, isChildAnimationComplete]);
 
   // Start child auto play when slide with child content is active
   useEffect(() => {
     const currentSlideData = slides[currentSlide];
     
     if (currentSlideData.hasChildNav && isPlaying) {
+      // Reset child animation completion when entering child slide
+      setIsChildAnimationComplete(false);
+      
       const timeout = setTimeout(() => {
         setChildAutoPlaying(true);
       }, 1000);
@@ -460,12 +516,15 @@ const CCACoins = () => {
   // Child auto play logic for Strategies
   useEffect(() => {
     if (childAutoPlaying && currentSlide === 2) {
+      // Clear any existing timers
       if (strategyCompletionTimerRef.current) {
         clearTimeout(strategyCompletionTimerRef.current);
       }
       
+      // Show current strategy for its duration
       const currentStrategy = strategies[strategySlide];
       strategyCompletionTimerRef.current = setTimeout(() => {
+        // Move to next strategy after completion time
         nextStrategy();
       }, currentStrategy.autoPlayTime);
 
@@ -480,12 +539,15 @@ const CCACoins = () => {
   // Child auto play logic for Technologies
   useEffect(() => {
     if (childAutoPlaying && currentSlide === 3) {
+      // Clear any existing timers
       if (techCompletionTimerRef.current) {
         clearTimeout(techCompletionTimerRef.current);
       }
       
+      // Show current technology for its duration
       const currentTech = technologies[techSlide];
       techCompletionTimerRef.current = setTimeout(() => {
+        // Move to next technology after completion time
         nextTech();
       }, currentTech.autoPlayTime);
 
@@ -497,7 +559,7 @@ const CCACoins = () => {
     }
   }, [childAutoPlaying, currentSlide, techSlide]);
 
-  // Child auto play logic for Bitcoin Halving - FIXED completion logic
+  // Child auto play logic for Bitcoin Halving - FIXED
   useEffect(() => {
     if (childAutoPlaying && currentSlide === 4) {
       // Clear any existing timers
@@ -511,12 +573,13 @@ const CCACoins = () => {
       if (bitcoinSlide === 0) {
         // Auto play halving chart
         if (visibleItems < halvingData.length) {
+          // Animate chart step by step
           childAutoPlayTimerRef.current = setInterval(() => {
             setVisibleItems(prev => {
               if (prev < halvingData.length) {
                 const newValue = prev + 1;
-                // If we've shown all items, stop the interval and move to next slide after delay
                 if (newValue >= halvingData.length) {
+                  // Chart complete
                   clearInterval(childAutoPlayTimerRef.current);
                   // Wait 3 seconds after completion, then move to graph
                   bitcoinCompletionTimerRef.current = setTimeout(() => {
@@ -527,7 +590,7 @@ const CCACoins = () => {
               }
               return prev;
             });
-          }, 1000);
+          }, 1000); // 1 second between items
         } else {
           // Chart already complete, wait then move to graph
           bitcoinCompletionTimerRef.current = setTimeout(() => {
@@ -537,29 +600,34 @@ const CCACoins = () => {
       } else if (bitcoinSlide === 1) {
         // Auto play graph
         if (visibleNodes < nodes.length) {
+          // Animate graph step by step
           childAutoPlayTimerRef.current = setInterval(() => {
             setVisibleNodes(prev => {
               if (prev < nodes.length) {
                 const newValue = prev + 1;
-                // If we've shown all nodes, stop the interval and wait before cycling back
                 if (newValue >= nodes.length) {
+                  // Graph complete
                   clearInterval(childAutoPlayTimerRef.current);
                   // Wait 3 seconds after completion, then cycle back to chart
                   bitcoinCompletionTimerRef.current = setTimeout(() => {
                     setVisibleNodes(0);
                     nextBitcoinSlide();
+                    // After cycling through both views, mark as complete
+                    setIsChildAnimationComplete(true);
                   }, 3000);
                 }
                 return newValue;
               }
               return prev;
             });
-          }, 600);
+          }, 600); // 0.6 seconds between nodes
         } else {
           // Graph already complete, wait then cycle back to chart
           bitcoinCompletionTimerRef.current = setTimeout(() => {
             setVisibleNodes(0);
             nextBitcoinSlide();
+            // After cycling through both views, mark as complete
+            setIsChildAnimationComplete(true);
           }, 3000);
         }
       }
@@ -590,6 +658,8 @@ const CCACoins = () => {
 
   const audioFile = '/audio/Inspiring and Uplifting Background Music For Videos & Presentations.mp3';
   const logoPath = '/audio/logo.png';
+  // Bitcoin image path for BRC 20
+  const bitcoinImagePath = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png';
 
   const getSlideTextSize = () => {
     if (isMobile) return 'text-3xl md:text-4xl lg:text-6xl';
@@ -783,23 +853,22 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 2 - Strategy - FIXED FOR MOBILE/TABLET with GOLDEN COLORS */}
-          <div className="min-w-full h-full flex flex-col px-4 md:px-6 lg:px-8 py-4 md:py-6 overflow-hidden relative">
-            {/* Background for Strategy Slide - Golden Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 via-slate-900/20 to-yellow-900/10 pointer-events-none"></div>
+          {/* Slide 2 - Strategy */}
+          <div className="min-w-full h-full flex flex-col px-2 md:px-4 lg:px-6 py-2 md:py-4 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 via-slate-900/20 to-yellow-900/10 backdrop-blur-sm pointer-events-none"></div>
             
-            <div className="flex items-center justify-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="relative z-10 flex items-center justify-center gap-1 md:gap-2 mb-2 md:mb-4">
               <img 
                 src={logoPath} 
                 alt="Logo" 
-                className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 object-contain drop-shadow-lg"
+                className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 object-contain drop-shadow-lg"
               />
               <h2 className={`${getSlideTextSize()} font-black text-center bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent`}>
                 Investment Strategies
               </h2>
             </div>
             
-            <div className="flex-1 flex items-center justify-center overflow-hidden px-2">
+            <div className="relative z-10 flex-1 flex items-center justify-center overflow-hidden px-1 md:px-2">
               <div className="w-full max-w-5xl">
                 {(() => {
                   const strategy = strategies[strategySlide];
@@ -808,66 +877,62 @@ const CCACoins = () => {
                   return (
                     <div className={`w-full ${isTransitioning ? 'strategy-fade-out' : 'strategy-fade-in'}`}>
                       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <div className={`absolute top-10 left-10 w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 bg-gradient-to-r ${strategy.color} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-20 animate-pulse-glow`}></div>
-                        <div className={`absolute bottom-10 right-10 w-40 h-40 md:w-48 md:h-48 lg:w-64 lg:h-64 bg-gradient-to-l ${strategy.color} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-15 animate-pulse-glow animation-delay-1000`}></div>
+                        <div className={`absolute top-5 md:top-10 left-5 md:left-10 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 bg-gradient-to-r ${strategy.color} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-20 animate-pulse-glow`}></div>
+                        <div className={`absolute bottom-5 md:bottom-10 right-5 md:right-10 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 bg-gradient-to-l ${strategy.color} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-15 animate-pulse-glow animation-delay-1000`}></div>
                       </div>
 
-                      <div className="relative flex flex-col lg:flex-row items-center justify-center gap-4 md:gap-6 lg:gap-8 xl:gap-12 px-2 md:px-4">
+                      <div className="relative flex flex-col lg:flex-row items-center justify-center gap-3 md:gap-4 lg:gap-6 xl:gap-8 px-1 md:px-2">
                         <div className="flex-shrink-0 relative">
-                          <div className="relative w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 2xl:w-72 2xl:h-72">
+                          <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56">
                             <div className="absolute inset-0 border-2 md:border-3 border-amber-400/20 rounded-full animate-spin-slow"></div>
-                            <div className="absolute inset-3 md:inset-4 lg:inset-6 border-2 md:border-3 border-yellow-400/25 rounded-full animate-spin-reverse"></div>
-                            <div className="absolute inset-6 md:inset-8 lg:inset-12 border-1 md:border-2 border-amber-300/30 rounded-full animate-spin-slow animation-delay-500"></div>
-                            <div className={`absolute inset-4 md:inset-6 lg:inset-8 bg-gradient-to-br ${strategy.color} rounded-full blur-lg md:blur-xl lg:blur-2xl opacity-40 animate-pulse-mega`}></div>
-                            <div className={`absolute inset-8 md:inset-10 lg:inset-14 bg-gradient-to-br ${strategy.color} rounded-lg md:rounded-xl lg:rounded-2xl flex items-center justify-center shadow-xl md:shadow-2xl icon-mega-float backdrop-blur-sm`}>
-                              <Icon className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 2xl:w-36 2xl:h-36 text-slate-900 drop-shadow-xl md:drop-shadow-2xl icon-breathe" />
+                            <div className="absolute inset-2 md:inset-3 lg:inset-4 border-2 md:border-3 border-yellow-400/25 rounded-full animate-spin-reverse"></div>
+                            <div className="absolute inset-4 md:inset-6 lg:inset-8 border-1 md:border-2 border-amber-300/30 rounded-full animate-spin-slow animation-delay-500"></div>
+                            <div className={`absolute inset-3 md:inset-4 lg:inset-5 bg-gradient-to-br ${strategy.color} rounded-full blur-lg md:blur-xl lg:blur-2xl opacity-40 animate-pulse-mega`}></div>
+                            <div className={`absolute inset-6 md:inset-8 lg:inset-10 bg-gradient-to-br ${strategy.color} rounded-lg md:rounded-xl lg:rounded-2xl flex items-center justify-center shadow-xl md:shadow-2xl icon-mega-float backdrop-blur-sm`}>
+                              <Icon className="w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 text-slate-900 drop-shadow-xl md:drop-shadow-2xl icon-breathe" />
                             </div>
-                            <div className="absolute top-0 left-1/2 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 bg-amber-400 rounded-full animate-orbit-1 shadow-lg shadow-amber-500/50"></div>
-                            <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 bg-yellow-400 rounded-full animate-orbit-2 shadow-lg shadow-yellow-500/50"></div>
-                            <div className="absolute left-0 top-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 bg-amber-500 rounded-full animate-orbit-3 shadow-lg shadow-amber-500/50"></div>
-                            <div className="absolute right-0 top-1/2 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 bg-yellow-500 rounded-full animate-orbit-4 shadow-lg shadow-yellow-500/50"></div>
+                            <div className="absolute top-0 left-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 bg-amber-400 rounded-full animate-orbit-1 shadow-lg shadow-amber-500/50"></div>
+                            <div className="absolute bottom-0 left-1/2 w-1 h-1 md:w-1.5 md:h-1.5 lg:w-2 lg:h-2 bg-yellow-400 rounded-full animate-orbit-2 shadow-lg shadow-yellow-500/50"></div>
                           </div>
                         </div>
 
-                        <div className="flex-1 text-center lg:text-left max-w-2xl">
-                          <div className="mb-3 md:mb-4 lg:mb-6">
-                            <h3 className={`${getSlideTextSize()} font-black mb-1 md:mb-2 lg:mb-3 leading-tight`}>
+                        <div className="flex-1 text-center lg:text-left max-w-2xl px-2 md:px-3">
+                          <div className="mb-2 md:mb-3 lg:mb-4">
+                            <h3 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-1 md:mb-2 leading-tight">
                               <span className="inline-block animate-text-shimmer bg-gradient-to-r from-amber-300 via-yellow-400 via-amber-400 to-amber-300 bg-clip-text text-transparent bg-size-300">
                                 {strategy.title}
                               </span>
                             </h3>
                             
                             {strategy.subtitle && (
-                              <p className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold mb-1 md:mb-2 lg:mb-3">
-                                <span className="inline-block animate-fade-in-up animation-delay-200 bg-gradient-to-r from-amber-300 to-yellow-400 bg-clip-text text-transparent">
-                                  {strategy.subtitle}
-                                </span>
+                              <p className="text-lg md:text-xl lg:text-2xl font-bold mb-1 md:mb-2 text-amber-300">
+                                {strategy.subtitle}
                               </p>
                             )}
                             
                             <div className="flex gap-1 md:gap-1.5 justify-center lg:justify-start mt-1 md:mt-2">
-                              <div className={`h-1 w-12 md:w-16 lg:w-20 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left`}></div>
-                              <div className={`h-1 w-8 md:w-10 lg:w-12 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left animation-delay-200`}></div>
+                              <div className={`h-1 w-8 md:w-12 lg:w-16 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left`}></div>
+                              <div className={`h-1 w-6 md:w-8 lg:w-10 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left animation-delay-200`}></div>
                               <div className={`h-1 w-4 md:w-6 lg:w-8 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left animation-delay-400`}></div>
                             </div>
                           </div>
 
-                          <p className={`${getBodyTextSize()} text-gray-100 leading-relaxed mb-3 md:mb-4 lg:mb-6 font-medium animate-fade-in-up animation-delay-400 drop-shadow-lg`}>
+                          <p className="text-sm md:text-base lg:text-lg text-gray-100 leading-relaxed mb-2 md:mb-3 lg:mb-4 font-medium animate-fade-in-up animation-delay-400 drop-shadow-lg">
                             {strategy.description}
                           </p>
 
-                          <div className="space-y-1.5 md:space-y-2 lg:space-y-3">
+                          <div className="space-y-1 md:space-y-1.5 lg:space-y-2">
                             {strategy.detailPoints.map((point, idx) => (
                               <div 
                                 key={idx}
-                                className="flex items-center justify-center lg:justify-start gap-2 md:gap-3 animate-slide-in-bounce"
+                                className="flex items-center justify-center lg:justify-start gap-1.5 md:gap-2 animate-slide-in-bounce"
                                 style={{ animationDelay: `${600 + idx * 150}ms` }}
                               >
                                 <div className="relative flex-shrink-0">
-                                  <div className={`w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 bg-gradient-to-r ${strategy.color} rounded-full animate-pulse-point`}></div>
-                                  <div className={`absolute inset-0 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 bg-gradient-to-r ${strategy.color} rounded-full blur-sm md:blur-md opacity-50`}></div>
+                                  <div className={`w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 bg-gradient-to-r ${strategy.color} rounded-full animate-pulse-point`}></div>
+                                  <div className={`absolute inset-0 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 bg-gradient-to-r ${strategy.color} rounded-full blur-sm md:blur-md opacity-50`}></div>
                                 </div>
-                                <span className={`${getBodyTextSize()} font-bold bg-gradient-to-r from-amber-200 to-yellow-300 bg-clip-text text-transparent drop-shadow-md`}>
+                                <span className="text-sm md:text-base lg:text-lg font-bold text-amber-200 drop-shadow-md">
                                   {point}
                                 </span>
                               </div>
@@ -882,73 +947,83 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 3 - Technologies - FIXED FOR MOBILE/TABLET with BLUE COLORS */}
-          <div className="min-w-full h-full flex flex-col px-4 md:px-6 lg:px-8 py-4 md:py-6 overflow-hidden relative">
-            {/* Background for Tech Slide - Blue Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/10 via-slate-900/20 to-blue-900/10 pointer-events-none"></div>
+          {/* Slide 3 - Technologies - WITH BITCOIN IMAGE FOR BRC 20 */}
+          <div className="min-w-full h-full flex flex-col px-2 md:px-4 lg:px-6 py-2 md:py-4 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/10 via-slate-900/20 to-blue-900/10 backdrop-blur-sm pointer-events-none"></div>
             
-            <div className="flex items-center justify-center gap-2 md:gap-3 mb-4 md:mb-6">
+            <div className="relative z-10 flex items-center justify-center gap-1 md:gap-2 mb-2 md:mb-4">
               <img 
                 src={logoPath} 
                 alt="Logo" 
-                className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 object-contain drop-shadow-lg"
+                className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 object-contain drop-shadow-lg"
               />
               <h2 className={`${getSlideTextSize()} font-black text-center bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent`}>
                 Technologies Used
               </h2>
             </div>
             
-            <div className="flex-1 flex items-center justify-center overflow-hidden px-2">
+            <div className="relative z-10 flex-1 flex items-center justify-center overflow-hidden px-1 md:px-2">
               <div className="w-full max-w-5xl">
                 {(() => {
                   const tech = technologies[techSlide];
                   const Icon = tech.icon;
+                  const isBRC20 = tech.name === 'BRC 20';
                   
                   return (
                     <div className={`w-full ${isTransitioning ? 'strategy-fade-out' : 'strategy-fade-in'}`}>
                       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <div className={`absolute top-10 left-10 w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 bg-gradient-to-r ${tech.gradient} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-20 animate-pulse-glow`}></div>
-                        <div className={`absolute bottom-10 right-10 w-40 h-40 md:w-48 md:h-48 lg:w-64 lg:h-64 bg-gradient-to-l ${tech.gradient} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-15 animate-pulse-glow animation-delay-1000`}></div>
+                        <div className={`absolute top-5 md:top-10 left-5 md:left-10 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 bg-gradient-to-r ${tech.gradient} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-20 animate-pulse-glow`}></div>
+                        <div className={`absolute bottom-5 md:bottom-10 right-5 md:right-10 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 bg-gradient-to-l ${tech.gradient} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-15 animate-pulse-glow animation-delay-1000`}></div>
                       </div>
 
-                      <div className="relative flex flex-col lg:flex-row items-center justify-center gap-4 md:gap-6 lg:gap-8 xl:gap-12 px-2 md:px-4">
+                      <div className="relative flex flex-col lg:flex-row items-center justify-center gap-3 md:gap-4 lg:gap-6 xl:gap-8 px-1 md:px-2">
                         <div className="flex-shrink-0 relative">
-                          <div className="relative w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 2xl:w-72 2xl:h-72">
+                          <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56">
                             <div className={`absolute inset-0 border-2 md:border-3 border-opacity-20 rounded-full animate-spin-slow`} style={{ borderColor: tech.color }}></div>
-                            <div className={`absolute inset-3 md:inset-4 lg:inset-6 border-2 md:border-3 border-opacity-25 rounded-full animate-spin-reverse`} style={{ borderColor: tech.color }}></div>
-                            <div className={`absolute inset-6 md:inset-8 lg:inset-12 border-1 md:border-2 border-opacity-30 rounded-full animate-spin-slow animation-delay-500`} style={{ borderColor: tech.color }}></div>
-                            <div className={`absolute inset-4 md:inset-6 lg:inset-8 bg-gradient-to-br ${tech.gradient} rounded-full blur-lg md:blur-xl lg:blur-2xl opacity-40 animate-pulse-mega`}></div>
-                            <div className={`absolute inset-8 md:inset-10 lg:inset-14 bg-gradient-to-br ${tech.gradient} rounded-lg md:rounded-xl lg:rounded-2xl flex items-center justify-center shadow-xl md:shadow-2xl icon-mega-float backdrop-blur-sm`}>
-                              <Icon className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 2xl:w-36 2xl:h-36 text-white drop-shadow-xl md:drop-shadow-2xl icon-breathe" />
+                            <div className={`absolute inset-2 md:inset-3 lg:inset-4 border-2 md:border-3 border-opacity-25 rounded-full animate-spin-reverse`} style={{ borderColor: tech.color }}></div>
+                            <div className={`absolute inset-4 md:inset-6 lg:inset-8 border-1 md:border-2 border-opacity-30 rounded-full animate-spin-slow animation-delay-500`} style={{ borderColor: tech.color }}></div>
+                            <div className={`absolute inset-3 md:inset-4 lg:inset-5 bg-gradient-to-br ${tech.gradient} rounded-full blur-lg md:blur-xl lg:blur-2xl opacity-40 animate-pulse-mega`}></div>
+                            <div className={`absolute inset-6 md:inset-8 lg:inset-10 bg-gradient-to-br ${tech.gradient} rounded-lg md:rounded-xl lg:rounded-2xl flex items-center justify-center shadow-xl md:shadow-2xl icon-mega-float backdrop-blur-sm`}>
+                              {isBRC20 ? (
+                                <div className="relative w-full h-full flex items-center justify-center p-4">
+                                  <img 
+                                    src={bitcoinImagePath} 
+                                    alt="Bitcoin" 
+                                    className="w-full h-full object-contain icon-breathe"
+                                    style={{ filter: 'brightness(1.2) saturate(1.2)' }}
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-700 rounded-lg md:rounded-xl lg:rounded-2xl opacity-20"></div>
+                                </div>
+                              ) : (
+                                <Icon className="w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 text-white drop-shadow-xl md:drop-shadow-2xl icon-breathe" />
+                              )}
                             </div>
-                            <div className="absolute top-0 left-1/2 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 rounded-full animate-orbit-1 shadow-lg" style={{ backgroundColor: tech.color }}></div>
-                            <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 rounded-full animate-orbit-2 shadow-lg" style={{ backgroundColor: tech.color }}></div>
-                            <div className="absolute left-0 top-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 rounded-full animate-orbit-3 shadow-lg" style={{ backgroundColor: tech.color }}></div>
-                            <div className="absolute right-0 top-1/2 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 rounded-full animate-orbit-4 shadow-lg" style={{ backgroundColor: tech.color }}></div>
+                            <div className="absolute top-0 left-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 rounded-full animate-orbit-1 shadow-lg" style={{ backgroundColor: tech.color }}></div>
+                            <div className="absolute bottom-0 left-1/2 w-1 h-1 md:w-1.5 md:h-1.5 lg:w-2 lg:h-2 rounded-full animate-orbit-2 shadow-lg" style={{ backgroundColor: tech.color }}></div>
                           </div>
                         </div>
 
-                        <div className="flex-1 text-center lg:text-left max-w-2xl">
-                          <div className="mb-3 md:mb-4 lg:mb-6">
-                            <h3 className={`${getSlideTextSize()} font-black mb-1 md:mb-2 lg:mb-3 leading-tight`}>
-                              <span className={`inline-block animate-text-shimmer bg-gradient-to-r ${tech.gradient} ${tech.gradient} ${tech.gradient} bg-clip-text text-transparent bg-size-300`}>
+                        <div className="flex-1 text-center lg:text-left max-w-2xl px-2 md:px-3">
+                          <div className="mb-2 md:mb-3 lg:mb-4">
+                            <h3 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-1 md:mb-2 leading-tight">
+                              <span className={`inline-block animate-text-shimmer bg-gradient-to-r ${tech.gradient} bg-clip-text text-transparent bg-size-300`}>
                                 {tech.name}
                               </span>
                             </h3>
                             
                             <div className="flex gap-1 md:gap-1.5 justify-center lg:justify-start mt-1 md:mt-2">
-                              <div className={`h-1 w-12 md:w-16 lg:w-20 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left`}></div>
-                              <div className={`h-1 w-8 md:w-10 lg:w-12 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left animation-delay-200`}></div>
+                              <div className={`h-1 w-8 md:w-12 lg:w-16 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left`}></div>
+                              <div className={`h-1 w-6 md:w-8 lg:w-10 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left animation-delay-200`}></div>
                               <div className={`h-1 w-4 md:w-6 lg:w-8 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left animation-delay-400`}></div>
                             </div>
                           </div>
 
-                          <div className="mb-3 md:mb-4 lg:mb-6 animate-fade-in-up animation-delay-400">
-                            <div className="flex items-center justify-center lg:justify-start gap-2 md:gap-3 mb-2 md:mb-3">
-                              <Coins className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8" style={{ color: tech.color }} />
-                              <span className={`${getBodyTextSize()} font-bold text-gray-300`}>Available Coins:</span>
+                          <div className="mb-2 md:mb-3 lg:mb-4 animate-fade-in-up animation-delay-400">
+                            <div className="flex items-center justify-center lg:justify-start gap-1.5 md:gap-2 mb-1 md:mb-2">
+                              <Coins className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" style={{ color: tech.color }} />
+                              <span className="text-sm md:text-base lg:text-lg font-bold text-gray-300">Available Coins:</span>
                             </div>
-                            <p className={`${getBodyTextSize()} text-gray-100 leading-relaxed font-medium drop-shadow-lg break-words`}>
+                            <p className="text-sm md:text-base lg:text-lg text-gray-100 leading-relaxed font-medium drop-shadow-lg break-words">
                               {tech.coins}
                             </p>
                           </div>
@@ -1185,34 +1260,34 @@ const CCACoins = () => {
                   {currentSlide === 2 && (
                     <>
                       <div className="flex items-center gap-1 md:gap-1.5 lg:gap-2 flex-shrink-0">
-                        <div className="p-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded md:rounded-lg border border-purple-500/30">
-                          <Target className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 text-purple-400" />
+                        <div className="p-1 bg-gradient-to-r from-amber-600/20 to-yellow-600/20 rounded md:rounded-lg border border-amber-500/30">
+                          <Target className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 text-amber-400" />
                         </div>
-                        <span className="text-xs md:text-sm font-medium text-purple-300">Strategies</span>
+                        <span className="text-xs md:text-sm font-medium text-amber-300">Strategies</span>
                       </div>
                       
                       <div className="h-3 md:h-4 w-px bg-slate-600 flex-shrink-0"></div>
                       
                       <button
                         onClick={prevStrategy}
-                        className="p-1.5 md:p-2 bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-600 hover:to-pink-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-purple-500/50 transition-all duration-300 flex-shrink-0"
+                        className="p-1.5 md:p-2 bg-gradient-to-r from-amber-700 to-yellow-700 hover:from-amber-600 hover:to-yellow-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-amber-500/50 transition-all duration-300 flex-shrink-0"
                         title="Previous Strategy"
                       >
                         <ChevronLeft className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4" />
                       </button>
                       
                       <div className="px-2 py-1 md:px-3 md:py-1.5 bg-slate-800/80 rounded md:rounded-lg border border-slate-600/50 min-w-[60px] md:min-w-[70px] lg:min-w-[80px] text-center flex-shrink-0">
-                        <span className="text-xs md:text-sm font-semibold text-purple-300 truncate">
+                        <span className="text-xs md:text-sm font-semibold text-amber-300 truncate">
                           {strategies[strategySlide].title}
                         </span>
-                        <div className="text-xs text-purple-400/70">
+                        <div className="text-xs text-amber-400/70">
                           {strategySlide + 1}/{strategies.length}
                         </div>
                       </div>
                       
                       <button
                         onClick={nextStrategy}
-                        className="p-1.5 md:p-2 bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-600 hover:to-pink-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-purple-500/50 transition-all duration-300 flex-shrink-0"
+                        className="p-1.5 md:p-2 bg-gradient-to-r from-amber-700 to-yellow-700 hover:from-amber-600 hover:to-yellow-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-amber-500/50 transition-all duration-300 flex-shrink-0"
                         title="Next Strategy"
                       >
                         <ChevronRight className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4" />
