@@ -20,7 +20,30 @@ import {
   Gem,
   Lock,
   DollarSign,
-  Server
+  Server,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Home,
+  BarChart3,
+  Target,
+  Cpu as CpuIcon,
+  Bitcoin,
+  CheckCircle,
+  Layers,
+  GitBranch,
+  GitMerge,
+  Grid,
+  List,
+  LayoutGrid,
+  SquareStack,
+  GitCompare,
+  ArrowLeftRight,
+  RotateCcw,
+  Smartphone,
+  Tablet,
+  Monitor
 } from 'lucide-react';
 
 const CCACoins = () => {
@@ -33,15 +56,40 @@ const CCACoins = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [visibleItems, setVisibleItems] = useState(0);
   const [visibleNodes, setVisibleNodes] = useState(0);
-  
-  // Separate hover states
-  const [showParentLeftArrow, setShowParentLeftArrow] = useState(false);
-  const [showParentRightArrow, setShowParentRightArrow] = useState(false);
-  const [showStrategyNav, setShowStrategyNav] = useState(false);
-  const [showTechNav, setShowTechNav] = useState(false);
-  const [showHalvingButtons, setShowHalvingButtons] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [childAutoPlaying, setChildAutoPlaying] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   
   const audioRef = useRef(null);
+  const autoPlayTimerRef = useRef(null);
+  const childAutoPlayTimerRef = useRef(null);
+  const strategyCompletionTimerRef = useRef(null);
+  const techCompletionTimerRef = useRef(null);
+  const bitcoinCompletionTimerRef = useRef(null);
+
+  // Responsive check
+  useEffect(() => {
+    const checkResponsive = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
+    
+    checkResponsive();
+    window.addEventListener('resize', checkResponsive);
+    
+    return () => window.removeEventListener('resize', checkResponsive);
+  }, []);
+
+  const slides = [
+    { id: 0, name: 'Intro', icon: Home, color: 'from-amber-500 to-yellow-500', hasChildNav: false },
+    { id: 1, name: 'Flow', icon: BarChart3, color: 'from-blue-500 to-cyan-500', hasChildNav: false },
+    { id: 2, name: 'Strategies', icon: Target, color: 'from-purple-500 to-pink-500', hasChildNav: true, type: 'strategy', childCount: 7 },
+    { id: 3, name: 'Tech', icon: CpuIcon, color: 'from-cyan-500 to-blue-500', hasChildNav: true, type: 'tech', childCount: 9 },
+    { id: 4, name: 'Halving', icon: Bitcoin, color: 'from-yellow-500 to-orange-500', hasChildNav: true, type: 'bitcoin', childCount: 2 },
+    { id: 5, name: 'Thank You', icon: CheckCircle, color: 'from-green-500 to-emerald-500', hasChildNav: false }
+  ];
 
   const directLevels = [
     { percentage: '1%', value: '$1000' },
@@ -57,7 +105,8 @@ const CCACoins = () => {
       subtitle: '(Dollar Cost Averaging)',
       color: 'from-amber-400 to-yellow-600',
       description: 'Systematically invest fixed amounts over time to reduce market timing risk.',
-      detailPoints: ['Minimize timing risk', 'Consistent investing', 'Long-term growth']
+      detailPoints: ['Minimize timing risk', 'Consistent investing', 'Long-term growth'],
+      autoPlayTime: 5000 // 5 seconds per strategy
     },
     { 
       icon: Coins, 
@@ -65,7 +114,8 @@ const CCACoins = () => {
       subtitle: '(Coin Cost Averaging)',
       color: 'from-yellow-500 to-amber-700',
       description: 'Optimize coin purchases based on market cycles and technical analysis.',
-      detailPoints: ['Market cycle analysis', 'Technical indicators', 'Strategic entry points']
+      detailPoints: ['Market cycle analysis', 'Technical indicators', 'Strategic entry points'],
+      autoPlayTime: 5000
     },
     { 
       icon: Shield, 
@@ -73,7 +123,8 @@ const CCACoins = () => {
       subtitle: '(Fundamental Strong Coin)',
       color: 'from-amber-500 to-orange-600',
       description: 'Invest in cryptocurrencies with strong fundamentals and long-term potential.',
-      detailPoints: ['Strong fundamentals', 'Quality projects', 'Sustainable growth']
+      detailPoints: ['Strong fundamentals', 'Quality projects', 'Sustainable growth'],
+      autoPlayTime: 5000
     },
     { 
       icon: Sparkles, 
@@ -81,7 +132,8 @@ const CCACoins = () => {
       subtitle: '(Smart Investment Plan)',
       color: 'from-yellow-400 to-amber-600',
       description: 'AI-powered investment strategies tailored to market conditions.',
-      detailPoints: ['AI-driven insights', 'Adaptive strategies', 'Market optimization']
+      detailPoints: ['AI-driven insights', 'Adaptive strategies', 'Market optimization'],
+      autoPlayTime: 5000
     },
     { 
       icon: Activity, 
@@ -89,7 +141,8 @@ const CCACoins = () => {
       subtitle: '',
       color: 'from-amber-400 to-yellow-500',
       description: 'Real-time market insights and breaking news alerts.',
-      detailPoints: ['Real-time alerts', 'Market analysis', 'Breaking news']
+      detailPoints: ['Real-time alerts', 'Market analysis', 'Breaking news'],
+      autoPlayTime: 5000
     },
     { 
       icon: Zap, 
@@ -97,7 +150,8 @@ const CCACoins = () => {
       subtitle: '',
       color: 'from-yellow-500 to-amber-600',
       description: 'Major crypto events, conferences, and product launches.',
-      detailPoints: ['Global conferences', 'Product launches', 'Industry events']
+      detailPoints: ['Global conferences', 'Product launches', 'Industry events'],
+      autoPlayTime: 5000
     },
     { 
       icon: Database, 
@@ -105,7 +159,8 @@ const CCACoins = () => {
       subtitle: '',
       color: 'from-amber-500 to-yellow-700',
       description: 'Bitcoin halving cycles analysis and investment opportunities.',
-      detailPoints: ['Cycle analysis', 'Historical patterns', 'Investment timing']
+      detailPoints: ['Cycle analysis', 'Historical patterns', 'Investment timing'],
+      autoPlayTime: 5000
     }
   ];
 
@@ -113,65 +168,74 @@ const CCACoins = () => {
     {
       icon: Cpu,
       name: 'AI Technology',
-      coins: 'TAO, NEAR Protocol, XAI, WLD, ICP (Internet Computer), Ocean Protocol, GRT, INT, ENN',
+      coins: 'TAO, NEAR Protocol, XAI, WLD, ICP, Ocean Protocol, GRT, INT, ENN',
       gradient: 'from-violet-500 to-purple-600',
-      color: '#8B5CF6'
+      color: '#8B5CF6',
+      autoPlayTime: 5000
     },
     {
       icon: Network,
-      name: 'Blockchain Technology',
-      coins: 'TRX, ADA, SOLO, WALKER (5GOLD), ETH, BTRC, ETHERMAL, A+B+COIN, ARB COIN, SOLO COIN, XAIT, AXS, GOLD, MOND, SAND, CROW',
+      name: 'Blockchain',
+      coins: 'TRX, ADA, SOLO, WALKER, ETH, BTRC, ETHERMAL, A+B+COIN, ARB',
       gradient: 'from-cyan-400 to-cyan-600',
-      color: '#00E5FF'
+      color: '#00E5FF',
+      autoPlayTime: 5000
     },
     {
       icon: Globe2,
-      name: 'Web 3 Technology',
-      coins: 'Theta, Doge, Osiim Protocol, File, Coinos, SOL, Polka dot, ICP (Internet Computer), ENS, GRT',
+      name: 'Web 3',
+      coins: 'Theta, Doge, Osiim Protocol, File, Coinos, SOL, Polka dot, ICP, ENS',
       gradient: 'from-blue-500 to-blue-700',
-      color: '#3B82F6'
+      color: '#3B82F6',
+      autoPlayTime: 5000
     },
     {
       icon: Gem,
-      name: 'NFT Technology',
-      coins: 'GMT coin, APT coin, APE coin, Near Protocol, AXS coin, CHZ coin, ZORA coin, Baby Dog coin',
+      name: 'NFT',
+      coins: 'GMT coin, APT coin, APE coin, Near Protocol, AXS coin, CHZ coin, ZORA',
       gradient: 'from-pink-500 to-pink-700',
-      color: '#EC4899'
+      color: '#EC4899',
+      autoPlayTime: 5000
     },
     {
       icon: Lock,
-      name: 'DeFi Technology',
-      coins: 'BIT coin, TWT coin (Trust wallet), Sushi coin (Sushi swipe), Uni coin (uni swipe), Cake coin (Pan cake swipe), 1 inch coin, Dodo coin, DYOX coin',
+      name: 'DeFi',
+      coins: 'BIT coin, TWT coin, Sushi coin, Uni coin, Cake coin, 1 inch coin, Dodo coin',
       gradient: 'from-green-500 to-green-700',
-      color: '#22C55E'
+      color: '#22C55E',
+      autoPlayTime: 5000
     },
     {
       icon: DollarSign,
-      name: 'DEX Technology',
+      name: 'DEX',
       coins: 'Decentralized Exchange (DEX) Game coins and platforms',
       gradient: 'from-teal-500 to-teal-700',
-      color: '#14B8A6'
+      color: '#14B8A6',
+      autoPlayTime: 5000
     },
     {
       icon: Sparkles,
-      name: 'Meme Coin Technology',
+      name: 'Meme Coin',
       coins: 'Doge, Shib, Pepe, Baby Dole, Akita, Ploti, kishu inu',
       gradient: 'from-yellow-400 to-orange-500',
-      color: '#FACC15'
+      color: '#FACC15',
+      autoPlayTime: 5000
     },
     {
       icon: Database,
-      name: 'BRC 20 Technology',
+      name: 'BRC 20',
       coins: 'Pepe, Diorydi, Saints, Rats, MultiBit, ORD',
       gradient: 'from-orange-500 to-orange-700',
-      color: '#F7931A'
+      color: '#F7931A',
+      autoPlayTime: 5000
     },
     {
       icon: Server,
-      name: 'High-Tech Infrastructure',
+      name: 'Infrastructure',
       coins: 'Various infrastructure and protocol coins',
       gradient: 'from-slate-400 to-slate-600',
-      color: '#94A3B8'
+      color: '#94A3B8',
+      autoPlayTime: 5000
     }
   ];
 
@@ -206,21 +270,40 @@ const CCACoins = () => {
   ];
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % 6);
-    setStrategySlide(0);
-    setTechSlide(0);
-    setBitcoinSlide(0);
-    setVisibleItems(0);
-    setVisibleNodes(0);
+    setCurrentSlide((prev) => {
+      const nextSlide = (prev + 1) % 6;
+      if (nextSlide === 5) {
+        // Reset child states when going to thank you slide
+        resetChildStates();
+      }
+      return nextSlide;
+    });
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + 6) % 6);
+    setCurrentSlide((prev) => {
+      const prevSlideNum = (prev - 1 + 6) % 6;
+      if (prevSlideNum === 5) {
+        resetChildStates();
+      }
+      return prevSlideNum;
+    });
+  };
+
+  const goToSlide = (slideIndex) => {
+    setCurrentSlide(slideIndex);
+    if (slideIndex !== 2 && slideIndex !== 3 && slideIndex !== 4) {
+      resetChildStates();
+    }
+  };
+
+  const resetChildStates = () => {
     setStrategySlide(0);
     setTechSlide(0);
     setBitcoinSlide(0);
     setVisibleItems(0);
     setVisibleNodes(0);
+    setChildAutoPlaying(false);
   };
 
   const nextStrategy = () => {
@@ -228,7 +311,7 @@ const CCACoins = () => {
     setTimeout(() => {
       setStrategySlide((prev) => (prev + 1) % strategies.length);
       setIsTransitioning(false);
-    }, 600);
+    }, 300);
   };
 
   const prevStrategy = () => {
@@ -236,7 +319,7 @@ const CCACoins = () => {
     setTimeout(() => {
       setStrategySlide((prev) => (prev - 1 + strategies.length) % strategies.length);
       setIsTransitioning(false);
-    }, 600);
+    }, 300);
   };
 
   const nextTech = () => {
@@ -316,8 +399,211 @@ const CCACoins = () => {
     }
   };
 
+  const toggleAutoPlay = () => {
+    const newPlayingState = !isPlaying;
+    setIsPlaying(newPlayingState);
+    
+    if (!newPlayingState) {
+      // If turning off auto play, also stop child auto play
+      setChildAutoPlaying(false);
+    }
+  };
+
+  const toggleChildAutoPlay = () => {
+    const newChildPlayingState = !childAutoPlaying;
+    setChildAutoPlaying(newChildPlayingState);
+  };
+
+  // Main auto play logic
+  useEffect(() => {
+    if (isPlaying) {
+      autoPlayTimerRef.current = setInterval(() => {
+        nextSlide();
+      }, 15000); // 15 seconds per main slide
+    } else if (autoPlayTimerRef.current) {
+      clearInterval(autoPlayTimerRef.current);
+    }
+
+    return () => {
+      if (autoPlayTimerRef.current) {
+        clearInterval(autoPlayTimerRef.current);
+      }
+    };
+  }, [isPlaying]);
+
+  // Start child auto play when slide with child content is active
+  useEffect(() => {
+    const currentSlideData = slides[currentSlide];
+    
+    if (currentSlideData.hasChildNav && isPlaying) {
+      // Start child auto play with a delay
+      const timeout = setTimeout(() => {
+        setChildAutoPlaying(true);
+      }, 1000);
+      
+      return () => clearTimeout(timeout);
+    } else {
+      setChildAutoPlaying(false);
+    }
+  }, [currentSlide, isPlaying]);
+
+  // Child auto play logic for Strategies
+  useEffect(() => {
+    if (childAutoPlaying && currentSlide === 2) {
+      // Clear any existing timers
+      if (strategyCompletionTimerRef.current) {
+        clearTimeout(strategyCompletionTimerRef.current);
+      }
+      
+      // Show current strategy for its duration
+      const currentStrategy = strategies[strategySlide];
+      strategyCompletionTimerRef.current = setTimeout(() => {
+        // Move to next strategy after completion time
+        nextStrategy();
+      }, currentStrategy.autoPlayTime);
+
+      return () => {
+        if (strategyCompletionTimerRef.current) {
+          clearTimeout(strategyCompletionTimerRef.current);
+        }
+      };
+    }
+  }, [childAutoPlaying, currentSlide, strategySlide]);
+
+  // Child auto play logic for Technologies
+  useEffect(() => {
+    if (childAutoPlaying && currentSlide === 3) {
+      // Clear any existing timers
+      if (techCompletionTimerRef.current) {
+        clearTimeout(techCompletionTimerRef.current);
+      }
+      
+      // Show current technology for its duration
+      const currentTech = technologies[techSlide];
+      techCompletionTimerRef.current = setTimeout(() => {
+        // Move to next technology after completion time
+        nextTech();
+      }, currentTech.autoPlayTime);
+
+      return () => {
+        if (techCompletionTimerRef.current) {
+          clearTimeout(techCompletionTimerRef.current);
+        }
+      };
+    }
+  }, [childAutoPlaying, currentSlide, techSlide]);
+
+  // Child auto play logic for Bitcoin Halving
+  useEffect(() => {
+    if (childAutoPlaying && currentSlide === 4) {
+      // Clear any existing timers
+      if (childAutoPlayTimerRef.current) {
+        clearInterval(childAutoPlayTimerRef.current);
+      }
+      if (bitcoinCompletionTimerRef.current) {
+        clearTimeout(bitcoinCompletionTimerRef.current);
+      }
+
+      if (bitcoinSlide === 0) {
+        // Auto play halving chart
+        if (visibleItems < halvingData.length) {
+          // Animate chart step by step
+          childAutoPlayTimerRef.current = setInterval(() => {
+            setVisibleItems(prev => {
+              if (prev < halvingData.length) {
+                return prev + 1;
+              }
+              return prev;
+            });
+          }, 1000); // 1 second between items
+        } else {
+          // Chart complete, wait then move to graph
+          bitcoinCompletionTimerRef.current = setTimeout(() => {
+            nextBitcoinSlide();
+          }, 3000); // Wait 3 seconds after chart completion
+        }
+      } else if (bitcoinSlide === 1) {
+        // Auto play graph
+        if (visibleNodes < nodes.length) {
+          // Animate graph step by step
+          childAutoPlayTimerRef.current = setInterval(() => {
+            setVisibleNodes(prev => {
+              if (prev < nodes.length) {
+                return prev + 1;
+              }
+              return prev;
+            });
+          }, 600); // 0.6 seconds between nodes
+        } else {
+          // Graph complete, wait then move back to chart
+          bitcoinCompletionTimerRef.current = setTimeout(() => {
+            setVisibleNodes(0);
+            nextBitcoinSlide();
+          }, 3000); // Wait 3 seconds after graph completion
+        }
+      }
+
+      return () => {
+        if (childAutoPlayTimerRef.current) {
+          clearInterval(childAutoPlayTimerRef.current);
+        }
+        if (bitcoinCompletionTimerRef.current) {
+          clearTimeout(bitcoinCompletionTimerRef.current);
+        }
+      };
+    } else if (childAutoPlayTimerRef.current) {
+      clearInterval(childAutoPlayTimerRef.current);
+    }
+  }, [childAutoPlaying, currentSlide, bitcoinSlide, visibleItems, visibleNodes]);
+
+  // Auto reset Bitcoin animation when changing views
+  useEffect(() => {
+    if (currentSlide === 4) {
+      if (bitcoinSlide === 0) {
+        setVisibleItems(0);
+      } else {
+        setVisibleNodes(0);
+      }
+    }
+  }, [currentSlide, bitcoinSlide]);
+
   const audioFile = '/audio/Inspiring and Uplifting Background Music For Videos & Presentations.mp3';
   const logoPath = '/audio/logo.png';
+
+  // Responsive text sizes
+  const getResponsiveText = {
+    xs: 'text-xs',
+    sm: 'text-sm',
+    base: 'text-base',
+    lg: 'text-lg',
+    xl: 'text-xl',
+    '2xl': 'text-2xl',
+    '3xl': 'text-3xl',
+    '4xl': 'text-4xl',
+    '5xl': 'text-5xl',
+    '6xl': 'text-6xl',
+    '7xl': 'text-7xl',
+    '8xl': 'text-8xl',
+    '9xl': 'text-9xl'
+  };
+
+  const getSlideTextSize = () => {
+    if (isMobile) return 'text-3xl md:text-4xl lg:text-6xl';
+    if (isTablet) return 'text-5xl lg:text-6xl';
+    return 'text-7xl lg:text-8xl';
+  };
+
+  const getTitleTextSize = () => {
+    if (isMobile) return 'text-2xl md:text-3xl lg:text-4xl';
+    if (isTablet) return 'text-3xl lg:text-4xl';
+    return 'text-4xl lg:text-5xl';
+  };
+
+  const getBodyTextSize = () => {
+    if (isMobile) return 'text-sm md:text-base lg:text-lg';
+    if (isTablet) return 'text-base lg:text-lg';
+    return 'text-lg lg:text-xl';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 text-white overflow-hidden relative">
@@ -329,43 +615,7 @@ const CCACoins = () => {
       </div>
 
       {/* Main Slide Container */}
-      <div className="relative z-10 h-screen overflow-hidden">
-        {/* Parent Navigation - Left Arrow (Show on all slides except first) */}
-        <div 
-          className={`absolute left-0 top-0 bottom-0 w-24 z-30 cursor-pointer transition-all duration-300 ${
-            currentSlide === 0 ? 'pointer-events-none opacity-0' : ''
-          }`}
-          onClick={prevSlide}
-          onMouseEnter={() => setShowParentLeftArrow(true)}
-          onMouseLeave={() => setShowParentLeftArrow(false)}
-        >
-          <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${
-            showParentLeftArrow ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
-          }`}>
-            <div className="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900 rounded-full p-3 shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 hover:scale-110">
-              <ChevronLeft className="w-6 h-6" />
-            </div>
-          </div>
-        </div>
-
-        {/* Parent Navigation - Right Arrow (Show on all slides except last) */}
-        <div 
-          className={`absolute right-0 top-0 bottom-0 w-24 z-30 cursor-pointer transition-all duration-300 ${
-            currentSlide === 5 ? 'pointer-events-none opacity-0' : ''
-          }`}
-          onClick={nextSlide}
-          onMouseEnter={() => setShowParentRightArrow(true)}
-          onMouseLeave={() => setShowParentRightArrow(false)}
-        >
-          <div className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${
-            showParentRightArrow ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
-          }`}>
-            <div className="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900 rounded-full p-3 shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 hover:scale-110">
-              <ChevronRight className="w-6 h-6" />
-            </div>
-          </div>
-        </div>
-
+      <div className="relative z-10 h-screen overflow-hidden pb-20 md:pb-24 lg:pb-32">
         <div 
           className="flex h-full transition-transform duration-700 ease-in-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -374,63 +624,63 @@ const CCACoins = () => {
           <div className="min-w-full h-full flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative overflow-y-auto">
             <div className="w-full max-w-6xl relative z-10">
               <div className="absolute inset-0 pointer-events-none opacity-30">
-                <Building2 className="absolute top-8 left-8 w-12 h-12 text-amber-500/40 animate-float" />
-                <DollarSign className="absolute top-12 right-12 w-16 h-16 text-yellow-500/40 animate-float-delayed" />
-                <Coins className="absolute bottom-12 left-12 w-20 h-20 text-amber-600/40 animate-float-slow" />
-                <Sparkles className="absolute bottom-8 right-8 w-10 h-10 text-yellow-400/40 animate-float" />
+                <Building2 className="absolute top-8 left-8 w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-amber-500/40 animate-float" />
+                <DollarSign className="absolute top-12 right-12 w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 text-yellow-500/40 animate-float-delayed" />
+                <Coins className="absolute bottom-12 left-12 w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 text-amber-600/40 animate-float-slow" />
+                <Sparkles className="absolute bottom-8 right-8 w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-yellow-400/40 animate-float" />
               </div>
 
               <div className="text-center relative">
-                <div className="mb-4 relative">
+                <div className="mb-2 md:mb-4 relative">
                   <div className="inline-block relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 rounded-full blur-2xl opacity-30"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 rounded-full blur-xl md:blur-2xl opacity-30"></div>
                     <img 
                       src={logoPath} 
                       alt="CCA Logo" 
-                      className="relative w-28 h-28 mx-auto object-contain drop-shadow-2xl"
+                      className="relative w-16 h-16 md:w-20 md:h-20 lg:w-28 lg:h-28 mx-auto object-contain drop-shadow-xl md:drop-shadow-2xl"
                     />
                   </div>
                 </div>
 
-                <div className="mb-2 overflow-hidden">
-                  <h1 className="text-5xl font-black mb-2 animate-slide-up leading-tight px-2">
+                <div className="mb-2 md:mb-4 overflow-hidden">
+                  <h1 className="text-2xl md:text-3xl lg:text-5xl font-black mb-1 md:mb-2 animate-slide-up leading-tight px-2">
                     <span className="bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent inline-block animate-gradient-x">
                       Welcome to
                     </span>
                   </h1>
                   
                   <div className="relative inline-block">
-                    <h2 className="text-8xl font-black bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 bg-clip-text text-transparent animate-slide-up animation-delay-300 tracking-tight leading-none px-2">
+                    <h2 className={`${getSlideTextSize()} font-black bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 bg-clip-text text-transparent animate-slide-up animation-delay-300 tracking-tight leading-none px-2`}>
                       CCA COIN
                     </h2>
-                    <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 animate-expand"></div>
+                    <div className="absolute -bottom-1 left-0 right-0 h-0.5 md:h-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 animate-expand"></div>
                   </div>
                 </div>
 
-                <p className="text-2xl text-gray-300 font-semibold mb-6 animate-fade-in animation-delay-600 px-6">
+                <p className={`${getTitleTextSize()} text-gray-300 font-semibold mb-3 md:mb-6 animate-fade-in animation-delay-600 px-4 md:px-6`}>
                   <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
                     Your Gateway to Smart Crypto Investments
                   </span>
                 </p>
 
-                <div className="flex flex-wrap justify-center gap-3 mb-6 animate-fade-in animation-delay-900 px-4">
-                  <div className="group bg-gradient-to-r from-amber-600/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/30 rounded-full px-5 py-2 hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/50">
-                    <span className="text-sm font-semibold text-amber-300 flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4" />
+                <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-4 md:mb-6 animate-fade-in animation-delay-900 px-2 md:px-4">
+                  <div className="group bg-gradient-to-r from-amber-600/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/30 rounded-full px-3 py-1.5 md:px-4 md:py-2 lg:px-5 lg:py-2 hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/50">
+                    <span className="text-xs md:text-sm font-semibold text-amber-300 flex items-center gap-1 md:gap-2">
+                      <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
                       <span>Smart Strategies</span>
                     </span>
                   </div>
                   
-                  <div className="group bg-gradient-to-r from-yellow-600/20 to-amber-600/20 backdrop-blur-sm border border-yellow-500/30 rounded-full px-5 py-2 hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/50">
-                    <span className="text-sm font-semibold text-yellow-300 flex items-center gap-2">
-                      <Shield className="w-4 h-4" />
+                  <div className="group bg-gradient-to-r from-yellow-600/20 to-amber-600/20 backdrop-blur-sm border border-yellow-500/30 rounded-full px-3 py-1.5 md:px-4 md:py-2 lg:px-5 lg:py-2 hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/50">
+                    <span className="text-xs md:text-sm font-semibold text-yellow-300 flex items-center gap-1 md:gap-2">
+                      <Shield className="w-3 h-3 md:w-4 md:h-4" />
                       <span>Secure Platform</span>
                     </span>
                   </div>
                   
-                  <div className="group bg-gradient-to-r from-amber-600/20 to-yellow-500/20 backdrop-blur-sm border border-amber-500/30 rounded-full px-5 py-2 hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/50">
-                    <span className="text-sm font-semibold text-amber-300 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" />
+                  <div className="group bg-gradient-to-r from-amber-600/20 to-yellow-500/20 backdrop-blur-sm border border-amber-500/30 rounded-full px-3 py-1.5 md:px-4 md:py-2 lg:px-5 lg:py-2 hover:scale-110 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/50">
+                    <span className="text-xs md:text-sm font-semibold text-amber-300 flex items-center gap-1 md:gap-2">
+                      <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
                       <span>High Returns</span>
                     </span>
                   </div>
@@ -438,44 +688,44 @@ const CCACoins = () => {
 
                 <button
                   onClick={nextSlide}
-                  className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900 text-lg font-bold px-8 py-4 rounded-full shadow-2xl hover:shadow-amber-500/50 transition-all duration-500 hover:scale-110 animate-bounce-slow animation-delay-1200"
+                  className="group relative inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900 text-sm md:text-base lg:text-lg font-bold px-6 py-3 md:px-8 md:py-4 rounded-full shadow-xl md:shadow-2xl hover:shadow-amber-500/50 transition-all duration-500 hover:scale-110 animate-bounce-slow animation-delay-1200"
                 >
                   <span>Start Your Journey</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-amber-400 rounded-full blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
+                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-2 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-amber-400 rounded-full blur-lg md:blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
                 </button>
 
-                <AnimatedStats />
+                <AnimatedStats isMobile={isMobile} isTablet={isTablet} />
               </div>
             </div>
           </div>
 
           {/* Slide 1 - Investment Flow */}
-          <div className="min-w-full h-full flex items-center justify-center px-8 py-6">
+          <div className="min-w-full h-full flex items-center justify-center px-4 md:px-6 lg:px-8 py-4 md:py-6">
             <div className="w-full max-w-5xl">
               <div className="text-center animate-fade-in">
-                <div className="flex items-center justify-center gap-4 mb-6">
+                <div className="flex items-center justify-center gap-2 md:gap-3 lg:gap-4 mb-4 md:mb-6">
                   <img 
                     src={logoPath} 
                     alt="Logo" 
-                    className="w-20 h-20 object-contain drop-shadow-lg"
+                    className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain drop-shadow-lg"
                   />
-                  <h1 className="text-7xl font-black bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent tracking-tight">
+                  <h1 className={`${getSlideTextSize()} font-black bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent tracking-tight`}>
                     CCA COIN
                   </h1>
                 </div>
                 
-                <div className="inline-block bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm border border-amber-500/30 rounded-full px-8 py-3.5 mb-12 shadow-2xl hover:shadow-amber-500/30 transition-all duration-500 hover:scale-105">
-                  <span className="text-2xl font-semibold">
+                <div className="inline-block bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm border border-amber-500/30 rounded-full px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-3.5 mb-6 md:mb-8 lg:mb-12 shadow-xl md:shadow-2xl hover:shadow-amber-500/30 transition-all duration-500 hover:scale-105">
+                  <span className="text-base md:text-xl lg:text-2xl font-semibold">
                     <span className="text-gray-300">Self ID should be of Minimum</span>{' '}
-                    <span className="text-amber-400 font-bold text-3xl">$1000</span>
+                    <span className="text-amber-400 font-bold text-xl md:text-2xl lg:text-3xl">$1000</span>
                   </span>
                 </div>
 
                 <div className="max-w-4xl mx-auto px-2">
-                  <div className="flex items-center justify-center gap-6 flex-wrap relative">
-                    <div className="bg-gradient-to-br from-amber-600 to-yellow-600 rounded-xl px-6 py-3 shadow-lg z-0 flex-shrink-0">
-                      <span className="text-lg font-semibold text-slate-900">DIRECT</span>
+                  <div className="flex items-center justify-center gap-2 md:gap-4 lg:gap-6 flex-wrap relative">
+                    <div className="bg-gradient-to-br from-amber-600 to-yellow-600 rounded-lg md:rounded-xl px-3 py-1.5 md:px-4 md:py-2 lg:px-6 lg:py-3 shadow-lg z-0 flex-shrink-0">
+                      <span className="text-xs md:text-sm lg:text-lg font-semibold text-slate-900">DIRECT</span>
                     </div>
                     {directLevels.map((level, index) => (
                       <React.Fragment key={index}>
@@ -485,17 +735,17 @@ const CCACoins = () => {
                           onMouseEnter={() => setHoveredCard(index)}
                           onMouseLeave={() => setHoveredCard(null)}
                         >
-                          <div className={`absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full blur-lg transition-opacity duration-500 ${
+                          <div className={`absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full blur-md md:blur-lg transition-opacity duration-500 ${
                             hoveredCard === index ? 'opacity-100' : 'opacity-50'
                           }`}></div>
-                          <div className={`relative bg-white rounded-full w-24 h-24 flex items-center justify-center border-4 shadow-xl transition-all duration-500 ${
+                          <div className={`relative bg-white rounded-full w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 flex items-center justify-center border-2 md:border-3 lg:border-4 shadow-lg md:shadow-xl transition-all duration-500 ${
                             hoveredCard === index 
-                              ? 'scale-150 border-yellow-400 shadow-2xl shadow-amber-500/60 border-amber-500' 
+                              ? 'scale-125 md:scale-150 border-yellow-400 shadow-xl md:shadow-2xl shadow-amber-500/60 border-amber-500' 
                               : 'scale-100 border-amber-500'
                           }`}>
                             <div className="text-center">
                               <div className={`font-bold text-slate-900 transition-all duration-500 ${
-                                hoveredCard === index ? 'text-3xl' : 'text-xl'
+                                hoveredCard === index ? 'text-lg md:text-xl lg:text-2xl xl:text-3xl' : 'text-sm md:text-base lg:text-xl'
                               }`}>
                                 {level.percentage}
                               </div>
@@ -503,25 +753,25 @@ const CCACoins = () => {
                           </div>
                         </div>
                         {index < directLevels.length - 1 && (
-                          <div className="w-8 h-2 bg-gradient-to-r from-amber-400 to-yellow-500 flex-shrink-0 z-0"></div>
+                          <div className="w-4 h-1 md:w-6 md:h-1.5 lg:w-8 lg:h-2 bg-gradient-to-r from-amber-400 to-yellow-500 flex-shrink-0 z-0"></div>
                         )}
                       </React.Fragment>
                     ))}
                     <div 
-                      className="bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl px-8 py-5 shadow-2xl animate-pulse cursor-pointer transition-all duration-500 flex-shrink-0"
+                      className="bg-gradient-to-br from-yellow-500 to-amber-600 rounded-lg md:rounded-xl px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-5 shadow-xl md:shadow-2xl animate-pulse cursor-pointer transition-all duration-500 flex-shrink-0"
                       style={{ zIndex: hoveredCard === 'final' ? 50 : 1 }}
                       onMouseEnter={() => setHoveredCard('final')}
                       onMouseLeave={() => setHoveredCard(null)}
                     >
                       <span className={`font-black text-slate-900 transition-all duration-500 block ${
-                        hoveredCard === 'final' ? 'text-5xl scale-150' : 'text-3xl'
+                        hoveredCard === 'final' ? 'text-2xl md:text-3xl lg:text-4xl xl:text-5xl scale-125 md:scale-150' : 'text-lg md:text-xl lg:text-2xl xl:text-3xl'
                       }`}>5%</span>
                       <span className={`font-semibold text-slate-900 transition-all duration-500 block ${
-                        hoveredCard === 'final' ? 'text-lg' : 'text-sm'
+                        hoveredCard === 'final' ? 'text-xs md:text-sm lg:text-base' : 'text-xs md:text-xs lg:text-sm'
                       }`}>CCA coins</span>
                     </div>
                   </div>
-                  <div className="text-amber-400 font-bold text-3xl mt-8 animate-bounce">
+                  <div className="text-amber-400 font-bold text-lg md:text-xl lg:text-2xl xl:text-3xl mt-4 md:mt-6 lg:mt-8 animate-bounce">
                     You $1000
                   </div>
                 </div>
@@ -530,23 +780,19 @@ const CCACoins = () => {
           </div>
 
           {/* Slide 2 - Strategy */}
-          <div 
-            className="min-w-full h-full flex flex-col px-8 py-6 overflow-hidden relative"
-            onMouseEnter={() => setShowStrategyNav(true)}
-            onMouseLeave={() => setShowStrategyNav(false)}
-          >
-            <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="min-w-full h-full flex flex-col px-4 md:px-6 lg:px-8 py-4 md:py-6 overflow-hidden relative">
+            <div className="flex items-center justify-center gap-2 md:gap-3 mb-4 md:mb-6">
               <img 
                 src={logoPath} 
                 alt="Logo" 
-                className="w-16 h-16 object-contain drop-shadow-lg"
+                className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 object-contain drop-shadow-lg"
               />
-              <h2 className="text-6xl font-black text-center bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
+              <h2 className={`${getSlideTextSize()} font-black text-center bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent`}>
                 Investment Strategies
               </h2>
             </div>
             
-            <div className="flex-1 flex items-center justify-center overflow-hidden">
+            <div className="flex-1 flex items-center justify-center overflow-hidden px-2">
               <div className="w-full max-w-5xl">
                 {(() => {
                   const strategy = strategies[strategySlide];
@@ -555,66 +801,66 @@ const CCACoins = () => {
                   return (
                     <div className={`w-full ${isTransitioning ? 'strategy-fade-out' : 'strategy-fade-in'}`}>
                       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <div className={`absolute top-10 left-10 w-48 h-48 bg-gradient-to-r ${strategy.color} rounded-full blur-3xl opacity-20 animate-pulse-glow`}></div>
-                        <div className={`absolute bottom-10 right-10 w-64 h-64 bg-gradient-to-l ${strategy.color} rounded-full blur-3xl opacity-15 animate-pulse-glow animation-delay-1000`}></div>
+                        <div className={`absolute top-10 left-10 w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 bg-gradient-to-r ${strategy.color} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-20 animate-pulse-glow`}></div>
+                        <div className={`absolute bottom-10 right-10 w-40 h-40 md:w-48 md:h-48 lg:w-64 lg:h-64 bg-gradient-to-l ${strategy.color} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-15 animate-pulse-glow animation-delay-1000`}></div>
                       </div>
 
-                      <div className="relative flex flex-col lg:flex-row items-center justify-center gap-12 px-4">
+                      <div className="relative flex flex-col lg:flex-row items-center justify-center gap-4 md:gap-6 lg:gap-8 xl:gap-12 px-2 md:px-4">
                         <div className="flex-shrink-0 relative">
-                          <div className="relative w-72 h-72">
-                            <div className="absolute inset-0 border-3 border-amber-400/20 rounded-full animate-spin-slow"></div>
-                            <div className="absolute inset-6 border-3 border-yellow-400/25 rounded-full animate-spin-reverse"></div>
-                            <div className="absolute inset-12 border-2 border-amber-300/30 rounded-full animate-spin-slow animation-delay-500"></div>
-                            <div className={`absolute inset-8 bg-gradient-to-br ${strategy.color} rounded-full blur-2xl opacity-40 animate-pulse-mega`}></div>
-                            <div className={`absolute inset-14 bg-gradient-to-br ${strategy.color} rounded-2xl flex items-center justify-center shadow-2xl icon-mega-float backdrop-blur-sm`}>
-                              <Icon className="w-36 h-36 text-slate-900 drop-shadow-2xl icon-breathe" />
+                          <div className="relative w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 2xl:w-72 2xl:h-72">
+                            <div className="absolute inset-0 border-2 md:border-3 border-amber-400/20 rounded-full animate-spin-slow"></div>
+                            <div className="absolute inset-3 md:inset-4 lg:inset-6 border-2 md:border-3 border-yellow-400/25 rounded-full animate-spin-reverse"></div>
+                            <div className="absolute inset-6 md:inset-8 lg:inset-12 border-1 md:border-2 border-amber-300/30 rounded-full animate-spin-slow animation-delay-500"></div>
+                            <div className={`absolute inset-4 md:inset-6 lg:inset-8 bg-gradient-to-br ${strategy.color} rounded-full blur-lg md:blur-xl lg:blur-2xl opacity-40 animate-pulse-mega`}></div>
+                            <div className={`absolute inset-8 md:inset-10 lg:inset-14 bg-gradient-to-br ${strategy.color} rounded-lg md:rounded-xl lg:rounded-2xl flex items-center justify-center shadow-xl md:shadow-2xl icon-mega-float backdrop-blur-sm`}>
+                              <Icon className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 2xl:w-36 2xl:h-36 text-slate-900 drop-shadow-xl md:drop-shadow-2xl icon-breathe" />
                             </div>
-                            <div className="absolute top-0 left-1/2 w-4 h-4 bg-amber-400 rounded-full animate-orbit-1 shadow-lg shadow-amber-500/50"></div>
-                            <div className="absolute bottom-0 left-1/2 w-3 h-3 bg-yellow-400 rounded-full animate-orbit-2 shadow-lg shadow-yellow-500/50"></div>
-                            <div className="absolute left-0 top-1/2 w-3 h-3 bg-amber-500 rounded-full animate-orbit-3 shadow-lg shadow-amber-500/50"></div>
-                            <div className="absolute right-0 top-1/2 w-4 h-4 bg-yellow-500 rounded-full animate-orbit-4 shadow-lg shadow-yellow-500/50"></div>
+                            <div className="absolute top-0 left-1/2 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 bg-amber-400 rounded-full animate-orbit-1 shadow-lg shadow-amber-500/50"></div>
+                            <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 bg-yellow-400 rounded-full animate-orbit-2 shadow-lg shadow-yellow-500/50"></div>
+                            <div className="absolute left-0 top-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 bg-amber-500 rounded-full animate-orbit-3 shadow-lg shadow-amber-500/50"></div>
+                            <div className="absolute right-0 top-1/2 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 bg-yellow-500 rounded-full animate-orbit-4 shadow-lg shadow-yellow-500/50"></div>
                           </div>
                         </div>
 
                         <div className="flex-1 text-center lg:text-left max-w-2xl">
-                          <div className="mb-6">
-                            <h3 className="text-7xl font-black mb-3 leading-tight">
+                          <div className="mb-3 md:mb-4 lg:mb-6">
+                            <h3 className={`${getSlideTextSize()} font-black mb-1 md:mb-2 lg:mb-3 leading-tight`}>
                               <span className="inline-block animate-text-shimmer bg-gradient-to-r from-amber-300 via-yellow-400 via-amber-400 to-amber-300 bg-clip-text text-transparent bg-size-300">
                                 {strategy.title}
                               </span>
                             </h3>
                             
                             {strategy.subtitle && (
-                              <p className="text-3xl font-bold mb-3">
+                              <p className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold mb-1 md:mb-2 lg:mb-3">
                                 <span className="inline-block animate-fade-in-up animation-delay-200 bg-gradient-to-r from-amber-300 to-yellow-400 bg-clip-text text-transparent">
                                   {strategy.subtitle}
                                 </span>
                               </p>
                             )}
                             
-                            <div className="flex gap-1.5 justify-center lg:justify-start mt-2">
-                              <div className={`h-1.5 w-20 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left`}></div>
-                              <div className={`h-1.5 w-12 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left animation-delay-200`}></div>
-                              <div className={`h-1.5 w-8 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left animation-delay-400`}></div>
+                            <div className="flex gap-1 md:gap-1.5 justify-center lg:justify-start mt-1 md:mt-2">
+                              <div className={`h-1 w-12 md:w-16 lg:w-20 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left`}></div>
+                              <div className={`h-1 w-8 md:w-10 lg:w-12 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left animation-delay-200`}></div>
+                              <div className={`h-1 w-4 md:w-6 lg:w-8 bg-gradient-to-r ${strategy.color} rounded-full animate-slide-in-left animation-delay-400`}></div>
                             </div>
                           </div>
 
-                          <p className="text-4xl text-gray-100 leading-relaxed mb-6 font-medium animate-fade-in-up animation-delay-400 drop-shadow-lg">
+                          <p className={`${getBodyTextSize()} text-gray-100 leading-relaxed mb-3 md:mb-4 lg:mb-6 font-medium animate-fade-in-up animation-delay-400 drop-shadow-lg`}>
                             {strategy.description}
                           </p>
 
-                          <div className="space-y-3">
+                          <div className="space-y-1.5 md:space-y-2 lg:space-y-3">
                             {strategy.detailPoints.map((point, idx) => (
                               <div 
                                 key={idx}
-                                className="flex items-center justify-center lg:justify-start gap-3 animate-slide-in-bounce"
+                                className="flex items-center justify-center lg:justify-start gap-2 md:gap-3 animate-slide-in-bounce"
                                 style={{ animationDelay: `${600 + idx * 150}ms` }}
                               >
                                 <div className="relative flex-shrink-0">
-                                  <div className={`w-4 h-4 bg-gradient-to-r ${strategy.color} rounded-full animate-pulse-point`}></div>
-                                  <div className={`absolute inset-0 w-4 h-4 bg-gradient-to-r ${strategy.color} rounded-full blur-md opacity-50`}></div>
+                                  <div className={`w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 bg-gradient-to-r ${strategy.color} rounded-full animate-pulse-point`}></div>
+                                  <div className={`absolute inset-0 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 bg-gradient-to-r ${strategy.color} rounded-full blur-sm md:blur-md opacity-50`}></div>
                                 </div>
-                                <span className="text-3xl font-bold bg-gradient-to-r from-amber-200 to-yellow-300 bg-clip-text text-transparent drop-shadow-md">
+                                <span className={`${getBodyTextSize()} font-bold bg-gradient-to-r from-amber-200 to-yellow-300 bg-clip-text text-transparent drop-shadow-md`}>
                                   {point}
                                 </span>
                               </div>
@@ -627,45 +873,22 @@ const CCACoins = () => {
                 })()}
               </div>
             </div>
-
-            {/* Strategy Navigation - Appears on Hover at Bottom */}
-            <div className={`flex justify-center items-center gap-6 py-4 transition-all duration-300 ${
-              showStrategyNav ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-            }`}>
-              <button
-                onClick={prevStrategy}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-full p-3 shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-110"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-
-              <button
-                onClick={nextStrategy}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-full p-3 shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-110"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </div>
           </div>
 
           {/* Slide 3 - Technologies */}
-          <div 
-            className="min-w-full h-full flex flex-col px-8 py-6 overflow-hidden relative"
-            onMouseEnter={() => setShowTechNav(true)}
-            onMouseLeave={() => setShowTechNav(false)}
-          >
-            <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="min-w-full h-full flex flex-col px-4 md:px-6 lg:px-8 py-4 md:py-6 overflow-hidden relative">
+            <div className="flex items-center justify-center gap-2 md:gap-3 mb-4 md:mb-6">
               <img 
                 src={logoPath} 
                 alt="Logo" 
-                className="w-16 h-16 object-contain drop-shadow-lg"
+                className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 object-contain drop-shadow-lg"
               />
-              <h2 className="text-6xl font-black text-center bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
+              <h2 className={`${getSlideTextSize()} font-black text-center bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent`}>
                 Technologies Used
               </h2>
             </div>
             
-            <div className="flex-1 flex items-center justify-center overflow-hidden">
+            <div className="flex-1 flex items-center justify-center overflow-hidden px-2">
               <div className="w-full max-w-5xl">
                 {(() => {
                   const tech = technologies[techSlide];
@@ -674,48 +897,48 @@ const CCACoins = () => {
                   return (
                     <div className={`w-full ${isTransitioning ? 'strategy-fade-out' : 'strategy-fade-in'}`}>
                       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <div className={`absolute top-10 left-10 w-48 h-48 bg-gradient-to-r ${tech.gradient} rounded-full blur-3xl opacity-20 animate-pulse-glow`}></div>
-                        <div className={`absolute bottom-10 right-10 w-64 h-64 bg-gradient-to-l ${tech.gradient} rounded-full blur-3xl opacity-15 animate-pulse-glow animation-delay-1000`}></div>
+                        <div className={`absolute top-10 left-10 w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 bg-gradient-to-r ${tech.gradient} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-20 animate-pulse-glow`}></div>
+                        <div className={`absolute bottom-10 right-10 w-40 h-40 md:w-48 md:h-48 lg:w-64 lg:h-64 bg-gradient-to-l ${tech.gradient} rounded-full blur-xl md:blur-2xl lg:blur-3xl opacity-15 animate-pulse-glow animation-delay-1000`}></div>
                       </div>
 
-                      <div className="relative flex flex-col lg:flex-row items-center justify-center gap-12 px-4">
+                      <div className="relative flex flex-col lg:flex-row items-center justify-center gap-4 md:gap-6 lg:gap-8 xl:gap-12 px-2 md:px-4">
                         <div className="flex-shrink-0 relative">
-                          <div className="relative w-72 h-72">
-                            <div className={`absolute inset-0 border-3 border-opacity-20 rounded-full animate-spin-slow`} style={{ borderColor: tech.color }}></div>
-                            <div className={`absolute inset-6 border-3 border-opacity-25 rounded-full animate-spin-reverse`} style={{ borderColor: tech.color }}></div>
-                            <div className={`absolute inset-12 border-2 border-opacity-30 rounded-full animate-spin-slow animation-delay-500`} style={{ borderColor: tech.color }}></div>
-                            <div className={`absolute inset-8 bg-gradient-to-br ${tech.gradient} rounded-full blur-2xl opacity-40 animate-pulse-mega`}></div>
-                            <div className={`absolute inset-14 bg-gradient-to-br ${tech.gradient} rounded-2xl flex items-center justify-center shadow-2xl icon-mega-float backdrop-blur-sm`}>
-                              <Icon className="w-36 h-36 text-white drop-shadow-2xl icon-breathe" />
+                          <div className="relative w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 2xl:w-72 2xl:h-72">
+                            <div className={`absolute inset-0 border-2 md:border-3 border-opacity-20 rounded-full animate-spin-slow`} style={{ borderColor: tech.color }}></div>
+                            <div className={`absolute inset-3 md:inset-4 lg:inset-6 border-2 md:border-3 border-opacity-25 rounded-full animate-spin-reverse`} style={{ borderColor: tech.color }}></div>
+                            <div className={`absolute inset-6 md:inset-8 lg:inset-12 border-1 md:border-2 border-opacity-30 rounded-full animate-spin-slow animation-delay-500`} style={{ borderColor: tech.color }}></div>
+                            <div className={`absolute inset-4 md:inset-6 lg:inset-8 bg-gradient-to-br ${tech.gradient} rounded-full blur-lg md:blur-xl lg:blur-2xl opacity-40 animate-pulse-mega`}></div>
+                            <div className={`absolute inset-8 md:inset-10 lg:inset-14 bg-gradient-to-br ${tech.gradient} rounded-lg md:rounded-xl lg:rounded-2xl flex items-center justify-center shadow-xl md:shadow-2xl icon-mega-float backdrop-blur-sm`}>
+                              <Icon className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 2xl:w-36 2xl:h-36 text-white drop-shadow-xl md:drop-shadow-2xl icon-breathe" />
                             </div>
-                            <div className="absolute top-0 left-1/2 w-4 h-4 rounded-full animate-orbit-1 shadow-lg" style={{ backgroundColor: tech.color }}></div>
-                            <div className="absolute bottom-0 left-1/2 w-3 h-3 rounded-full animate-orbit-2 shadow-lg" style={{ backgroundColor: tech.color }}></div>
-                            <div className="absolute left-0 top-1/2 w-3 h-3 rounded-full animate-orbit-3 shadow-lg" style={{ backgroundColor: tech.color }}></div>
-                            <div className="absolute right-0 top-1/2 w-4 h-4 rounded-full animate-orbit-4 shadow-lg" style={{ backgroundColor: tech.color }}></div>
+                            <div className="absolute top-0 left-1/2 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 rounded-full animate-orbit-1 shadow-lg" style={{ backgroundColor: tech.color }}></div>
+                            <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 rounded-full animate-orbit-2 shadow-lg" style={{ backgroundColor: tech.color }}></div>
+                            <div className="absolute left-0 top-1/2 w-1.5 h-1.5 md:w-2 md:h-2 lg:w-3 lg:h-3 rounded-full animate-orbit-3 shadow-lg" style={{ backgroundColor: tech.color }}></div>
+                            <div className="absolute right-0 top-1/2 w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4 rounded-full animate-orbit-4 shadow-lg" style={{ backgroundColor: tech.color }}></div>
                           </div>
                         </div>
 
                         <div className="flex-1 text-center lg:text-left max-w-2xl">
-                          <div className="mb-6">
-                            <h3 className="text-7xl font-black mb-3 leading-tight">
+                          <div className="mb-3 md:mb-4 lg:mb-6">
+                            <h3 className={`${getSlideTextSize()} font-black mb-1 md:mb-2 lg:mb-3 leading-tight`}>
                               <span className={`inline-block animate-text-shimmer bg-gradient-to-r ${tech.gradient} ${tech.gradient} ${tech.gradient} bg-clip-text text-transparent bg-size-300`}>
                                 {tech.name}
                               </span>
                             </h3>
                             
-                            <div className="flex gap-1.5 justify-center lg:justify-start mt-2">
-                              <div className={`h-1.5 w-20 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left`}></div>
-                              <div className={`h-1.5 w-12 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left animation-delay-200`}></div>
-                              <div className={`h-1.5 w-8 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left animation-delay-400`}></div>
+                            <div className="flex gap-1 md:gap-1.5 justify-center lg:justify-start mt-1 md:mt-2">
+                              <div className={`h-1 w-12 md:w-16 lg:w-20 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left`}></div>
+                              <div className={`h-1 w-8 md:w-10 lg:w-12 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left animation-delay-200`}></div>
+                              <div className={`h-1 w-4 md:w-6 lg:w-8 bg-gradient-to-r ${tech.gradient} rounded-full animate-slide-in-left animation-delay-400`}></div>
                             </div>
                           </div>
 
-                          <div className="mb-6 animate-fade-in-up animation-delay-400">
-                            <div className="flex items-center justify-center lg:justify-start gap-3 mb-3">
-                              <Coins className="w-8 h-8" style={{ color: tech.color }} />
-                              <span className="text-2xl font-bold text-gray-300">Available Coins:</span>
+                          <div className="mb-3 md:mb-4 lg:mb-6 animate-fade-in-up animation-delay-400">
+                            <div className="flex items-center justify-center lg:justify-start gap-2 md:gap-3 mb-2 md:mb-3">
+                              <Coins className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8" style={{ color: tech.color }} />
+                              <span className={`${getBodyTextSize()} font-bold text-gray-300`}>Available Coins:</span>
                             </div>
-                            <p className="text-3xl text-gray-100 leading-relaxed font-medium drop-shadow-lg">
+                            <p className={`${getBodyTextSize()} text-gray-100 leading-relaxed font-medium drop-shadow-lg`}>
                               {tech.coins}
                             </p>
                           </div>
@@ -726,41 +949,18 @@ const CCACoins = () => {
                 })()}
               </div>
             </div>
-
-            {/* Technology Navigation - Appears on Hover at Bottom */}
-            <div className={`flex justify-center items-center gap-6 py-4 transition-all duration-300 ${
-              showTechNav ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-            }`}>
-              <button
-                onClick={prevTech}
-                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-full p-3 shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-110"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-
-              <button
-                onClick={nextTech}
-                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-full p-3 shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-110"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </div>
           </div>
 
           {/* Slide 4 - Bitcoin Halving */}
-          <div 
-            className="min-w-full h-full flex items-center justify-center px-8 py-4 overflow-hidden"
-            onMouseEnter={() => setShowHalvingButtons(true)}
-            onMouseLeave={() => setShowHalvingButtons(false)}
-          >
+          <div className="min-w-full h-full flex items-center justify-center px-4 md:px-6 lg:px-8 py-4 overflow-hidden">
             <div className="w-full max-w-7xl h-full flex flex-col">
-              <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="flex items-center justify-center gap-1 md:gap-2 mb-2 md:mb-3">
                 <img 
                   src={logoPath} 
                   alt="Logo" 
-                  className="w-10 h-10 object-contain drop-shadow-xl"
+                  className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 object-contain drop-shadow-lg md:drop-shadow-xl"
                 />
-                <h2 className="text-3xl font-black text-center bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
+                <h2 className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-black text-center bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
                   Bitcoin Halving
                 </h2>
               </div>
@@ -768,47 +968,47 @@ const CCACoins = () => {
               <div className="flex-1 flex items-center justify-center overflow-hidden">
                 {bitcoinSlide === 0 ? (
                   <div className="w-full h-full flex flex-col max-w-4xl">
-                    <div className="text-center mb-2">
-                      <h3 className="text-lg font-bold bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent mb-1">
+                    <div className="text-center mb-1 md:mb-2">
+                      <h3 className="text-sm md:text-base lg:text-lg font-bold bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent mb-0.5 md:mb-1">
                         Halving Chart
                       </h3>
                       <p className="text-xs text-amber-200">
-                        Click to reveal the Bitcoin halving timeline
+                        {childAutoPlaying ? 'Auto-playing...' : 'Click to reveal the Bitcoin halving timeline'}
                       </p>
                     </div>
 
-                    <div className="flex-1 flex flex-col justify-center space-y-2 overflow-y-auto px-2">
+                    <div className="flex-1 flex flex-col justify-center space-y-1 md:space-y-1.5 lg:space-y-2 overflow-y-auto px-1 md:px-2">
                       {halvingData.map((item, index) => (
                         <div
                           key={item.year}
                           className={`transform transition-all duration-700 ${
                             index < visibleItems
                               ? 'opacity-100 translate-y-0 scale-100'
-                              : 'opacity-0 translate-y-8 scale-95'
+                              : 'opacity-0 translate-y-4 md:translate-y-8 scale-95'
                           }`}
                         >
                           <div className="relative group">
                             <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-lg blur-sm opacity-40 group-hover:opacity-60 transition-all duration-500"></div>
                             
-                            <div className="relative bg-gradient-to-br from-slate-800/70 to-slate-900/70 backdrop-blur-md rounded-lg p-2.5 border-2 border-amber-500/50 hover:border-amber-400/70 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30">
-                              <div className="flex items-center gap-2.5">
+                            <div className="relative bg-gradient-to-br from-slate-800/70 to-slate-900/70 backdrop-blur-md rounded-lg p-1.5 md:p-2 lg:p-2.5 border-2 border-amber-500/50 hover:border-amber-400/70 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30">
+                              <div className="flex items-center gap-1.5 md:gap-2 lg:gap-2.5">
                                 <div className="flex-shrink-0">
-                                  <div className="bg-gradient-to-r from-amber-600 to-yellow-600 px-3 py-1 rounded-md border-2 border-amber-400/50 shadow-lg">
-                                    <span className="text-xl font-bold text-slate-900 whitespace-nowrap">
+                                  <div className="bg-gradient-to-r from-amber-600 to-yellow-600 px-2 py-0.5 md:px-2.5 md:py-1 lg:px-3 lg:py-1 rounded-md border-2 border-amber-400/50 shadow-lg">
+                                    <span className="text-base md:text-lg lg:text-xl font-bold text-slate-900 whitespace-nowrap">
                                       {item.year}
                                     </span>
                                   </div>
                                 </div>
 
                                 <div className="flex-shrink-0">
-                                  <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                   </svg>
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                  <div className="bg-gradient-to-r from-yellow-600/30 to-amber-600/30 backdrop-blur-sm px-3 py-2 rounded-md border-2 border-yellow-400/50 text-center shadow-lg">
-                                    <span className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tracking-wide">
+                                  <div className="bg-gradient-to-r from-yellow-600/30 to-amber-600/30 backdrop-blur-sm px-2 py-1 md:px-2.5 md:py-1.5 lg:px-3 lg:py-2 rounded-md border-2 border-yellow-400/50 text-center shadow-lg">
+                                    <span className="text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tracking-wide">
                                       {item.btc}
                                     </span>
                                   </div>
@@ -822,12 +1022,12 @@ const CCACoins = () => {
                   </div>
                 ) : (
                   <div className="w-full h-full flex flex-col max-w-7xl">
-                    <div className="text-center mb-2">
-                      <h3 className="text-lg font-black text-amber-400 mb-0.5">
+                    <div className="text-center mb-1 md:mb-2">
+                      <h3 className="text-sm md:text-base lg:text-lg font-black text-amber-400 mb-0.5">
                         Bitcoin Pattern Graph
                       </h3>
                       <p className="text-xs text-amber-300/80">
-                        Reveal Bitcoin's historical pattern
+                        {childAutoPlaying ? 'Auto-playing...' : 'Reveal Bitcoin\'s historical pattern'}
                       </p>
                     </div>
                     
@@ -895,107 +1095,65 @@ const CCACoins = () => {
                   </div>
                 )}
               </div>
-
-              {/* Halving Controls - Show on hover */}
-              <div className={`mt-3 space-y-1 transition-all duration-300 ${
-                showHalvingButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-              }`}>
-                <div className="flex gap-1.5 justify-center">
-                  <button
-                    onClick={prevBitcoinSlide}
-                    className="px-3 py-1 text-xs font-semibold rounded-lg border-2 bg-slate-700/50 hover:bg-slate-600/50 text-amber-400 border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 transform hover:scale-105"
-                  >
-                    ← Previous
-                  </button>
-                  <button
-                    onClick={nextBitcoinSlide}
-                    className="px-3 py-1 text-xs font-semibold rounded-lg border-2 bg-slate-700/50 hover:bg-slate-600/50 text-amber-400 border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 transform hover:scale-105"
-                  >
-                    Next →
-                  </button>
-                </div>
-
-                <div className="flex gap-1.5 justify-center">
-                  <button
-                    onClick={handleBitcoinNext}
-                    className="px-4 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900 text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl hover:shadow-amber-500/50 transition-all duration-300 transform hover:scale-105"
-                  >
-                    {((bitcoinSlide === 0 && visibleItems === 0) || (bitcoinSlide === 1 && visibleNodes === 0))
-                      ? 'Start' 
-                      : ((bitcoinSlide === 0 && visibleItems < halvingData.length) || (bitcoinSlide === 1 && visibleNodes < nodes.length))
-                      ? 'Next' 
-                      : 'Restart'}
-                  </button>
-                  
-                  {((bitcoinSlide === 0 && visibleItems > 0) || (bitcoinSlide === 1 && visibleNodes > 0)) && (
-                    <button
-                      onClick={handleBitcoinReset}
-                      className="px-4 py-1.5 bg-slate-700/50 hover:bg-slate-600/50 text-amber-400 text-sm font-semibold rounded-lg border-2 border-amber-500/30 hover:border-amber-400/50 transition-all duration-300 transform hover:scale-105"
-                    >
-                      Reset
-                    </button>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
 
           {/* Slide 5 - Thank You */}
-          <div className="min-w-full h-full flex items-center justify-center px-8 py-8 relative overflow-y-auto">
+          <div className="min-w-full h-full flex items-center justify-center px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8 relative overflow-y-auto">
             <div className="w-full max-w-3xl relative z-10">
               <div className="absolute inset-0 pointer-events-none opacity-20">
-                <Sparkles className="absolute top-10 left-10 w-12 h-12 text-amber-500/40 animate-float" />
-                <Heart className="absolute top-20 right-20 w-16 h-16 text-yellow-500/40 animate-float-delayed" />
-                <Coins className="absolute bottom-20 left-20 w-20 h-20 text-amber-600/40 animate-float-slow" />
-                <Shield className="absolute bottom-10 right-10 w-10 h-10 text-yellow-400/40 animate-float" />
+                <Sparkles className="absolute top-10 left-10 w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-amber-500/40 animate-float" />
+                <Heart className="absolute top-20 right-20 w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 text-yellow-500/40 animate-float-delayed" />
+                <Coins className="absolute bottom-20 left-20 w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 xl:w-20 xl:h-20 text-amber-600/40 animate-float-slow" />
+                <Shield className="absolute bottom-10 right-10 w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 text-yellow-400/40 animate-float" />
               </div>
 
               <div className="text-center relative">
-                <div className="mb-8 relative animate-fade-in">
+                <div className="mb-4 md:mb-6 lg:mb-8 relative animate-fade-in">
                   <div className="inline-block relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 rounded-full blur-2xl opacity-40"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 rounded-full blur-lg md:blur-xl lg:blur-2xl opacity-40"></div>
                     <img 
                       src={logoPath} 
                       alt="CCA Coins Logo" 
-                      className="relative w-40 h-40 mx-auto object-contain drop-shadow-2xl"
+                      className="relative w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-40 xl:h-40 mx-auto object-contain drop-shadow-xl md:drop-shadow-2xl"
                     />
                   </div>
                 </div>
 
-                <div className="mb-8 animate-slide-up animation-delay-300">
-                  <h1 className="text-7xl font-black mb-4">
+                <div className="mb-4 md:mb-6 lg:mb-8 animate-slide-up animation-delay-300">
+                  <h1 className={`${getSlideTextSize()} font-black mb-2 md:mb-3 lg:mb-4`}>
                     <span className="bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent animate-gradient-x">
                       Thank You!
                     </span>
                   </h1>
                   
-                  <div className="w-32 h-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 mx-auto rounded-full animate-expand"></div>
+                  <div className="w-20 h-0.5 md:w-24 md:h-1 lg:w-32 lg:h-1 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 mx-auto rounded-full animate-expand"></div>
                 </div>
 
-                <p className="text-3xl text-gray-300 font-semibold mb-8 animate-fade-in animation-delay-600 px-4">
+                <p className={`${getTitleTextSize()} text-gray-300 font-semibold mb-4 md:mb-6 lg:mb-8 animate-fade-in animation-delay-600 px-2 md:px-3 lg:px-4`}>
                   <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
                     For Choosing CCA Coin
                   </span>
                 </p>
 
                 <div className="animate-fade-in animation-delay-900">
-                  <p className="text-lg text-gray-400 font-medium mb-6 px-4 leading-relaxed">
+                  <p className={`${getBodyTextSize()} text-gray-400 font-medium mb-3 md:mb-4 lg:mb-6 px-2 md:px-3 lg:px-4 leading-relaxed`}>
                     Your journey to smart crypto investments starts here
                   </p>
                   
-                  <div className="flex justify-center items-center gap-4 mb-6">
-                    <div className="w-16 h-1 bg-gradient-to-r from-transparent to-amber-500 rounded-full"></div>
-                    <Heart className="w-8 h-8 text-amber-400 animate-pulse" />
-                    <div className="w-16 h-1 bg-gradient-to-l from-transparent to-amber-500 rounded-full"></div>
+                  <div className="flex justify-center items-center gap-2 md:gap-3 lg:gap-4 mb-3 md:mb-4 lg:mb-6">
+                    <div className="w-8 h-0.5 md:w-12 md:h-1 lg:w-16 lg:h-1 bg-gradient-to-r from-transparent to-amber-500 rounded-full"></div>
+                    <Heart className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8 text-amber-400 animate-pulse" />
+                    <div className="w-8 h-0.5 md:w-12 md:h-1 lg:w-16 lg:h-1 bg-gradient-to-l from-transparent to-amber-500 rounded-full"></div>
                   </div>
                 </div>
 
                 <div className="animate-fade-in animation-delay-1200">
-                  <div className="inline-block bg-gradient-to-r from-amber-600/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/30 rounded-2xl px-10 py-5 shadow-2xl hover:shadow-amber-500/30 transition-all duration-500 hover:scale-105">
-                    <p className="text-xl font-bold text-amber-400 mb-1">
+                  <div className="inline-block bg-gradient-to-r from-amber-600/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/30 rounded-lg md:rounded-xl lg:rounded-2xl px-6 py-3 md:px-8 md:py-4 lg:px-10 lg:py-5 shadow-xl md:shadow-2xl hover:shadow-amber-500/30 transition-all duration-500 hover:scale-105">
+                    <p className="text-base md:text-lg lg:text-xl font-bold text-amber-400 mb-0.5 md:mb-1">
                       Stay Connected
                     </p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-xs md:text-sm text-gray-400">
                       Join thousands of successful investors
                     </p>
                   </div>
@@ -1006,18 +1164,280 @@ const CCACoins = () => {
         </div>
       </div>
 
-      {/* Mute/Unmute Button */}
-      <button
-        onClick={toggleMute}
-        className="fixed top-10 right-8 z-20 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900 rounded-full p-4 shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 hover:scale-110"
-        title={isMuted ? "Unmute" : "Mute"}
-      >
-        {isMuted ? (
-          <VolumeX className="w-6 h-6" />
-        ) : (
-          <Volume2 className="w-6 h-6" />
-        )}
-      </button>
+      {/* VLC Style Control Panel - Fixed at Bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-slate-900/95 to-slate-800/95 backdrop-blur-lg border-t border-slate-700/50 shadow-2xl">
+        <div className="container mx-auto px-2 md:px-3 lg:px-4">
+          {/* Child Navigation Panel - Shows only for slides with child content */}
+          {slides[currentSlide].hasChildNav && (
+            <div className="py-1 md:py-1.5 lg:py-2 border-b border-slate-600/50">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+                <div className="flex items-center justify-center md:justify-start gap-1.5 md:gap-2 lg:gap-3 overflow-x-auto pb-1 md:pb-0">
+                  {currentSlide === 2 && (
+                    <>
+                      <div className="flex items-center gap-1 md:gap-1.5 lg:gap-2 flex-shrink-0">
+                        <div className="p-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded md:rounded-lg border border-purple-500/30">
+                          <Target className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 text-purple-400" />
+                        </div>
+                        <span className="text-xs md:text-sm font-medium text-purple-300">Strategies</span>
+                      </div>
+                      
+                      <div className="h-3 md:h-4 w-px bg-slate-600 flex-shrink-0"></div>
+                      
+                      <button
+                        onClick={prevStrategy}
+                        className="p-1.5 md:p-2 bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-600 hover:to-pink-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-purple-500/50 transition-all duration-300 flex-shrink-0"
+                        title="Previous Strategy"
+                      >
+                        <ChevronLeft className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4" />
+                      </button>
+                      
+                      <div className="px-2 py-1 md:px-3 md:py-1.5 bg-slate-800/80 rounded md:rounded-lg border border-slate-600/50 min-w-[60px] md:min-w-[70px] lg:min-w-[80px] text-center flex-shrink-0">
+                        <span className="text-xs md:text-sm font-semibold text-purple-300 truncate">
+                          {strategies[strategySlide].title}
+                        </span>
+                        <div className="text-xs text-purple-400/70">
+                          {strategySlide + 1}/{strategies.length}
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={nextStrategy}
+                        className="p-1.5 md:p-2 bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-600 hover:to-pink-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-purple-500/50 transition-all duration-300 flex-shrink-0"
+                        title="Next Strategy"
+                      >
+                        <ChevronRight className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4" />
+                      </button>
+                    </>
+                  )}
+                  
+                  {currentSlide === 3 && (
+                    <>
+                      <div className="flex items-center gap-1 md:gap-1.5 lg:gap-2 flex-shrink-0">
+                        <div className="p-1 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded md:rounded-lg border border-cyan-500/30">
+                          <CpuIcon className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 text-cyan-400" />
+                        </div>
+                        <span className="text-xs md:text-sm font-medium text-cyan-300">Technologies</span>
+                      </div>
+                      
+                      <div className="h-3 md:h-4 w-px bg-slate-600 flex-shrink-0"></div>
+                      
+                      <button
+                        onClick={prevTech}
+                        className="p-1.5 md:p-2 bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 flex-shrink-0"
+                        title="Previous Technology"
+                      >
+                        <ChevronLeft className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4" />
+                      </button>
+                      
+                      <div className="px-2 py-1 md:px-3 md:py-1.5 bg-slate-800/80 rounded md:rounded-lg border border-slate-600/50 min-w-[70px] md:min-w-[90px] lg:min-w-[120px] text-center flex-shrink-0">
+                        <span className="text-xs md:text-sm font-semibold text-cyan-300 truncate">
+                          {technologies[techSlide].name}
+                        </span>
+                        <div className="text-xs text-cyan-400/70">
+                          {techSlide + 1}/{technologies.length}
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={nextTech}
+                        className="p-1.5 md:p-2 bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 flex-shrink-0"
+                        title="Next Technology"
+                      >
+                        <ChevronRight className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4" />
+                      </button>
+                    </>
+                  )}
+                  
+                  {currentSlide === 4 && (
+                    <>
+                      <div className="flex items-center gap-1 md:gap-1.5 lg:gap-2 flex-shrink-0">
+                        <div className="p-1 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded md:rounded-lg border border-yellow-500/30">
+                          <Bitcoin className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 text-yellow-400" />
+                        </div>
+                        <span className="text-xs md:text-sm font-medium text-yellow-300">Bitcoin</span>
+                      </div>
+                      
+                      <div className="h-3 md:h-4 w-px bg-slate-600 flex-shrink-0"></div>
+                      
+                      <div className="flex items-center gap-1 md:gap-1.5 lg:gap-2 flex-shrink-0">
+                        <button
+                          onClick={prevBitcoinSlide}
+                          className="p-1.5 md:p-2 bg-gradient-to-r from-yellow-700 to-orange-700 hover:from-yellow-600 hover:to-orange-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-yellow-500/50 transition-all duration-300"
+                          title="Previous View"
+                        >
+                          <ChevronLeft className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4" />
+                        </button>
+                        
+                        <div className="px-2 py-1 md:px-3 md:py-1.5 bg-slate-800/80 rounded md:rounded-lg border border-slate-600/50 min-w-[60px] md:min-w-[70px] lg:min-w-[80px] text-center">
+                          <span className="text-xs md:text-sm font-semibold text-yellow-300 truncate">
+                            {bitcoinSlide === 0 ? 'Chart' : 'Graph'}
+                          </span>
+                          <div className="text-xs text-yellow-400/70">
+                            {bitcoinSlide === 0 ? `${visibleItems}/${halvingData.length}` : `${visibleNodes}/${nodes.length}`}
+                          </div>
+                        </div>
+                        
+                        <button
+                          onClick={nextBitcoinSlide}
+                          className="p-1.5 md:p-2 bg-gradient-to-r from-yellow-700 to-orange-700 hover:from-yellow-600 hover:to-orange-600 text-white rounded md:rounded-lg shadow-lg hover:shadow-yellow-500/50 transition-all duration-300"
+                          title="Next View"
+                        >
+                          <ChevronRight className="w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4" />
+                        </button>
+                      </div>
+                      
+                      <div className="h-3 md:h-4 w-px bg-slate-600 flex-shrink-0 hidden md:block"></div>
+                      
+                      <div className="flex items-center gap-1 md:gap-1.5 lg:gap-2 flex-shrink-0">
+                        <button
+                          onClick={handleBitcoinNext}
+                          className="px-2 py-1 md:px-3 md:py-1.5 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900 text-xs md:text-sm font-semibold rounded md:rounded-lg shadow-lg hover:shadow-xl hover:shadow-amber-500/50 transition-all duration-300"
+                        >
+                          Next Step
+                        </button>
+                        
+                        <button
+                          onClick={handleBitcoinReset}
+                          className="px-2 py-1 md:px-3 md:py-1.5 bg-slate-700/50 hover:bg-slate-600/50 text-amber-400 text-xs md:text-sm font-semibold rounded md:rounded-lg border border-amber-500/30 hover:border-amber-400/50 transition-all duration-300"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+                
+                {/* Child Auto Play Toggle */}
+                <div className="flex justify-center md:justify-end">
+                  <button
+                    onClick={toggleChildAutoPlay}
+                    className={`flex items-center gap-1 md:gap-1.5 px-2 py-1 md:px-3 md:py-1.5 rounded md:rounded-lg transition-all duration-300 ${
+                      childAutoPlaying
+                        ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white'
+                        : 'bg-gradient-to-r from-slate-700 to-slate-800 text-slate-300 hover:text-white'
+                    }`}
+                    title={childAutoPlaying ? "Stop Auto Play" : "Start Auto Play"}
+                  >
+                    {childAutoPlaying ? (
+                      <>
+                        <Pause className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                        <span className="text-xs font-medium">Stop Auto</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                        <span className="text-xs font-medium">Auto Play</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Main Control Panel */}
+          <div className="py-2 md:py-2.5 lg:py-3">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+              {/* Left Side - Slide Navigation */}
+              <div className="flex items-center justify-center md:justify-start space-x-2 md:space-x-2.5 lg:space-x-3">
+                <button
+                  onClick={prevSlide}
+                  className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-300 hover:text-white rounded p-2 md:p-2.5 shadow-lg hover:shadow-xl transition-all duration-300"
+                  title="Previous Slide"
+                >
+                  <ChevronLeft className="w-4 h-4 md:w-4.5 md:h-4.5 lg:w-5 lg:h-5" />
+                </button>
+                
+                <button
+                  onClick={nextSlide}
+                  className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-300 hover:text-white rounded p-2 md:p-2.5 shadow-lg hover:shadow-xl transition-all duration-300"
+                  title="Next Slide"
+                >
+                  <ChevronRight className="w-4 h-4 md:w-4.5 md:h-4.5 lg:w-5 lg:h-5" />
+                </button>
+                
+                <div className="h-4 md:h-5 lg:h-6 w-px bg-slate-600 hidden md:block"></div>
+                
+                <button
+                  onClick={toggleAutoPlay}
+                  className={`rounded p-2 md:p-2.5 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                    isPlaying 
+                      ? 'bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900' 
+                      : 'bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-300 hover:text-white'
+                  }`}
+                  title={isPlaying ? "Pause AutoPlay" : "Start AutoPlay"}
+                >
+                  {isPlaying ? (
+                    <Pause className="w-4 h-4 md:w-4.5 md:h-4.5 lg:w-5 lg:h-5" />
+                  ) : (
+                    <Play className="w-4 h-4 md:w-4.5 md:h-4.5 lg:w-5 lg:h-5" />
+                  )}
+                </button>
+              </div>
+
+              {/* Center - Slide Indicators */}
+              <div className="flex items-center justify-center space-x-1 md:space-x-1.5 lg:space-x-2 overflow-x-auto py-1 md:py-0">
+                {slides.map((slide, index) => (
+                  <button
+                    key={slide.id}
+                    onClick={() => goToSlide(index)}
+                    className={`flex items-center space-x-1 md:space-x-1.5 lg:space-x-2 px-2 py-1 md:px-2.5 md:py-1.5 lg:px-3 lg:py-1.5 rounded md:rounded-lg transition-all duration-300 flex-shrink-0 ${
+                      currentSlide === index
+                        ? 'bg-gradient-to-r from-amber-600/30 to-yellow-600/30 border border-amber-500/50 shadow-lg shadow-amber-500/20'
+                        : 'bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/30'
+                    }`}
+                  >
+                    <slide.icon className={`w-3 h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4 ${currentSlide === index ? 'text-amber-400' : 'text-slate-400'}`} />
+                    <span className={`text-xs md:text-sm font-medium ${currentSlide === index ? 'text-amber-300' : 'text-slate-300'}`}>
+                      {isMobile ? slide.name.substring(0, 3) : slide.name}
+                    </span>
+                    {currentSlide === index && (
+                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 animate-pulse"></div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Right Side - Audio & Progress */}
+              <div className="flex items-center justify-center md:justify-end space-x-2 md:space-x-2.5 lg:space-x-3">
+                <div className="text-xs md:text-sm text-slate-400 font-medium">
+                  <span className="text-amber-400">{currentSlide + 1}</span>
+                  <span className="mx-0.5 md:mx-1">/</span>
+                  <span>{slides.length}</span>
+                </div>
+                
+                <div className="h-4 md:h-5 lg:h-6 w-px bg-slate-600 hidden md:block"></div>
+                
+                <button
+                  onClick={toggleMute}
+                  className={`rounded p-2 md:p-2.5 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                    isMuted 
+                      ? 'bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-300 hover:text-white' 
+                      : 'bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-900'
+                  }`}
+                  title={isMuted ? "Unmute" : "Mute"}
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-4 h-4 md:w-4.5 md:h-4.5 lg:w-5 lg:h-5" />
+                  ) : (
+                    <Volume2 className="w-4 h-4 md:w-4.5 md:h-4.5 lg:w-5 lg:h-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="mt-2 md:mt-2.5 lg:mt-3">
+              <div className="h-0.5 md:h-1 bg-slate-700/50 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full transition-all duration-300"
+                  style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Audio Element */}
       <audio
@@ -1388,7 +1808,7 @@ const CCACoins = () => {
   );
 };
 
-const AnimatedStats = () => {
+const AnimatedStats = ({ isMobile, isTablet }) => {
   const [users, setUsers] = useState(0);
   const [volume, setVolume] = useState(0);
   const [uptime, setUptime] = useState(0);
@@ -1438,31 +1858,43 @@ const AnimatedStats = () => {
     return num;
   };
 
+  const getStatsTextSize = () => {
+    if (isMobile) return 'text-2xl md:text-3xl';
+    if (isTablet) return 'text-3xl lg:text-4xl';
+    return 'text-4xl lg:text-5xl';
+  };
+
+  const getStatsLabelSize = () => {
+    if (isMobile) return 'text-xs md:text-sm';
+    if (isTablet) return 'text-sm lg:text-base';
+    return 'text-base lg:text-lg';
+  };
+
   return (
-    <div className="grid grid-cols-3 gap-6 mt-8 animate-fade-in animation-delay-1500 px-4">
+    <div className="grid grid-cols-3 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6 lg:mt-8 animate-fade-in animation-delay-1500 px-2 md:px-3 lg:px-4">
       <div className="text-center">
-        <div className="text-4xl font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-1 animate-count-up">
+        <div className={`${getStatsTextSize()} font-black bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-0.5 md:mb-1 animate-count-up`}>
           {formatNumber(users)}+
         </div>
-        <div className="text-sm text-gray-400 font-semibold">
+        <div className={`${getStatsLabelSize()} text-gray-400 font-semibold`}>
           Active Users
         </div>
       </div>
       
       <div className="text-center">
-        <div className="text-4xl font-black bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent mb-1 animate-count-up">
+        <div className={`${getStatsTextSize()} font-black bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent mb-0.5 md:mb-1 animate-count-up`}>
           ${volume}M+
         </div>
-        <div className="text-sm text-gray-400 font-semibold">
+        <div className={`${getStatsLabelSize()} text-gray-400 font-semibold`}>
           Trading Volume
         </div>
       </div>
       
       <div className="text-center">
-        <div className="text-4xl font-black bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent mb-1 animate-count-up">
+        <div className={`${getStatsTextSize()} font-black bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent mb-0.5 md:mb-1 animate-count-up`}>
           {uptime.toFixed(1)}%
         </div>
-        <div className="text-sm text-gray-400 font-semibold">
+        <div className={`${getStatsLabelSize()} text-gray-400 font-semibold`}>
           Uptime
         </div>
       </div>
