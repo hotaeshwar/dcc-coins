@@ -273,7 +273,6 @@ const CCACoins = () => {
     setCurrentSlide((prev) => {
       const nextSlide = (prev + 1) % 6;
       if (nextSlide === 5) {
-        // Reset child states when going to thank you slide
         resetChildStates();
       }
       return nextSlide;
@@ -404,7 +403,6 @@ const CCACoins = () => {
     setIsPlaying(newPlayingState);
     
     if (!newPlayingState) {
-      // If turning off auto play, also stop child auto play
       setChildAutoPlaying(false);
     }
   };
@@ -414,12 +412,25 @@ const CCACoins = () => {
     setChildAutoPlaying(newChildPlayingState);
   };
 
-  // Main auto play logic
+  // Main auto play logic - FIXED to wait for child completion
   useEffect(() => {
     if (isPlaying) {
+      // Clear existing timer
+      if (autoPlayTimerRef.current) {
+        clearInterval(autoPlayTimerRef.current);
+      }
+      
       autoPlayTimerRef.current = setInterval(() => {
+        // Check if we're on a slide with child nav and if child auto play is active
+        const currentSlideData = slides[currentSlide];
+        if (currentSlideData.hasChildNav && childAutoPlaying) {
+          // Don't advance main slide while child auto play is active
+          return;
+        }
+        
+        // Otherwise, proceed to next slide
         nextSlide();
-      }, 15000); // 15 seconds per main slide
+      }, 15000);
     } else if (autoPlayTimerRef.current) {
       clearInterval(autoPlayTimerRef.current);
     }
@@ -429,14 +440,13 @@ const CCACoins = () => {
         clearInterval(autoPlayTimerRef.current);
       }
     };
-  }, [isPlaying]);
+  }, [isPlaying, currentSlide, childAutoPlaying]);
 
   // Start child auto play when slide with child content is active
   useEffect(() => {
     const currentSlideData = slides[currentSlide];
     
     if (currentSlideData.hasChildNav && isPlaying) {
-      // Start child auto play with a delay
       const timeout = setTimeout(() => {
         setChildAutoPlaying(true);
       }, 1000);
@@ -450,15 +460,12 @@ const CCACoins = () => {
   // Child auto play logic for Strategies
   useEffect(() => {
     if (childAutoPlaying && currentSlide === 2) {
-      // Clear any existing timers
       if (strategyCompletionTimerRef.current) {
         clearTimeout(strategyCompletionTimerRef.current);
       }
       
-      // Show current strategy for its duration
       const currentStrategy = strategies[strategySlide];
       strategyCompletionTimerRef.current = setTimeout(() => {
-        // Move to next strategy after completion time
         nextStrategy();
       }, currentStrategy.autoPlayTime);
 
@@ -473,15 +480,12 @@ const CCACoins = () => {
   // Child auto play logic for Technologies
   useEffect(() => {
     if (childAutoPlaying && currentSlide === 3) {
-      // Clear any existing timers
       if (techCompletionTimerRef.current) {
         clearTimeout(techCompletionTimerRef.current);
       }
       
-      // Show current technology for its duration
       const currentTech = technologies[techSlide];
       techCompletionTimerRef.current = setTimeout(() => {
-        // Move to next technology after completion time
         nextTech();
       }, currentTech.autoPlayTime);
 
@@ -493,7 +497,7 @@ const CCACoins = () => {
     }
   }, [childAutoPlaying, currentSlide, techSlide]);
 
-  // Child auto play logic for Bitcoin Halving
+  // Child auto play logic for Bitcoin Halving - FIXED completion logic
   useEffect(() => {
     if (childAutoPlaying && currentSlide === 4) {
       // Clear any existing timers
@@ -507,39 +511,56 @@ const CCACoins = () => {
       if (bitcoinSlide === 0) {
         // Auto play halving chart
         if (visibleItems < halvingData.length) {
-          // Animate chart step by step
           childAutoPlayTimerRef.current = setInterval(() => {
             setVisibleItems(prev => {
               if (prev < halvingData.length) {
-                return prev + 1;
+                const newValue = prev + 1;
+                // If we've shown all items, stop the interval and move to next slide after delay
+                if (newValue >= halvingData.length) {
+                  clearInterval(childAutoPlayTimerRef.current);
+                  // Wait 3 seconds after completion, then move to graph
+                  bitcoinCompletionTimerRef.current = setTimeout(() => {
+                    nextBitcoinSlide();
+                  }, 3000);
+                }
+                return newValue;
               }
               return prev;
             });
-          }, 1000); // 1 second between items
+          }, 1000);
         } else {
-          // Chart complete, wait then move to graph
+          // Chart already complete, wait then move to graph
           bitcoinCompletionTimerRef.current = setTimeout(() => {
             nextBitcoinSlide();
-          }, 3000); // Wait 3 seconds after chart completion
+          }, 3000);
         }
       } else if (bitcoinSlide === 1) {
         // Auto play graph
         if (visibleNodes < nodes.length) {
-          // Animate graph step by step
           childAutoPlayTimerRef.current = setInterval(() => {
             setVisibleNodes(prev => {
               if (prev < nodes.length) {
-                return prev + 1;
+                const newValue = prev + 1;
+                // If we've shown all nodes, stop the interval and wait before cycling back
+                if (newValue >= nodes.length) {
+                  clearInterval(childAutoPlayTimerRef.current);
+                  // Wait 3 seconds after completion, then cycle back to chart
+                  bitcoinCompletionTimerRef.current = setTimeout(() => {
+                    setVisibleNodes(0);
+                    nextBitcoinSlide();
+                  }, 3000);
+                }
+                return newValue;
               }
               return prev;
             });
-          }, 600); // 0.6 seconds between nodes
+          }, 600);
         } else {
-          // Graph complete, wait then move back to chart
+          // Graph already complete, wait then cycle back to chart
           bitcoinCompletionTimerRef.current = setTimeout(() => {
             setVisibleNodes(0);
             nextBitcoinSlide();
-          }, 3000); // Wait 3 seconds after graph completion
+          }, 3000);
         }
       }
 
@@ -569,23 +590,6 @@ const CCACoins = () => {
 
   const audioFile = '/audio/Inspiring and Uplifting Background Music For Videos & Presentations.mp3';
   const logoPath = '/audio/logo.png';
-
-  // Responsive text sizes
-  const getResponsiveText = {
-    xs: 'text-xs',
-    sm: 'text-sm',
-    base: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
-    '2xl': 'text-2xl',
-    '3xl': 'text-3xl',
-    '4xl': 'text-4xl',
-    '5xl': 'text-5xl',
-    '6xl': 'text-6xl',
-    '7xl': 'text-7xl',
-    '8xl': 'text-8xl',
-    '9xl': 'text-9xl'
-  };
 
   const getSlideTextSize = () => {
     if (isMobile) return 'text-3xl md:text-4xl lg:text-6xl';
@@ -779,8 +783,11 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 2 - Strategy */}
+          {/* Slide 2 - Strategy - FIXED FOR MOBILE/TABLET with GOLDEN COLORS */}
           <div className="min-w-full h-full flex flex-col px-4 md:px-6 lg:px-8 py-4 md:py-6 overflow-hidden relative">
+            {/* Background for Strategy Slide - Golden Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 via-slate-900/20 to-yellow-900/10 pointer-events-none"></div>
+            
             <div className="flex items-center justify-center gap-2 md:gap-3 mb-4 md:mb-6">
               <img 
                 src={logoPath} 
@@ -875,15 +882,18 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 3 - Technologies */}
+          {/* Slide 3 - Technologies - FIXED FOR MOBILE/TABLET with BLUE COLORS */}
           <div className="min-w-full h-full flex flex-col px-4 md:px-6 lg:px-8 py-4 md:py-6 overflow-hidden relative">
+            {/* Background for Tech Slide - Blue Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/10 via-slate-900/20 to-blue-900/10 pointer-events-none"></div>
+            
             <div className="flex items-center justify-center gap-2 md:gap-3 mb-4 md:mb-6">
               <img 
                 src={logoPath} 
                 alt="Logo" 
                 className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16 object-contain drop-shadow-lg"
               />
-              <h2 className={`${getSlideTextSize()} font-black text-center bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent`}>
+              <h2 className={`${getSlideTextSize()} font-black text-center bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent`}>
                 Technologies Used
               </h2>
             </div>
@@ -938,7 +948,7 @@ const CCACoins = () => {
                               <Coins className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8" style={{ color: tech.color }} />
                               <span className={`${getBodyTextSize()} font-bold text-gray-300`}>Available Coins:</span>
                             </div>
-                            <p className={`${getBodyTextSize()} text-gray-100 leading-relaxed font-medium drop-shadow-lg`}>
+                            <p className={`${getBodyTextSize()} text-gray-100 leading-relaxed font-medium drop-shadow-lg break-words`}>
                               {tech.coins}
                             </p>
                           </div>
