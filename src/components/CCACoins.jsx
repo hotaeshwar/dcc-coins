@@ -96,7 +96,8 @@ const CCACoins = () => {
     { percentage: '1%', value: '$1000' },
     { percentage: '2%', value: '$1000' },
     { percentage: '3%', value: '$1000' },
-    { percentage: '4%', value: '$1000' }
+    { percentage: '4%', value: '$1000' },
+    { percentage: '5%', value: '$1000' }
   ];
 
   const strategies = [
@@ -774,7 +775,7 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 1 - Investment Flow */}
+          {/* Slide 1 - Investment Flow - CHANGED TO CIRCLES */}
           <div className="min-w-full h-full flex items-center justify-center px-4 md:px-6 lg:px-8 py-4 md:py-6">
             <div className="w-full max-w-5xl">
               <div className="text-center animate-fade-in">
@@ -798,11 +799,32 @@ const CCACoins = () => {
 
                 <div className="max-w-4xl mx-auto px-2">
                   <div className="flex items-center justify-center gap-2 md:gap-4 lg:gap-6 flex-wrap relative">
-                    <div className="bg-gradient-to-br from-amber-600 to-yellow-600 rounded-lg md:rounded-xl px-3 py-1.5 md:px-4 md:py-2 lg:px-6 lg:py-3 shadow-lg z-0 flex-shrink-0">
-                      <span className="text-xs md:text-sm lg:text-lg font-semibold text-slate-900">DIRECT</span>
+                    {/* DIRECT Label - Changed to circle */}
+                    <div className="relative group cursor-pointer flex-shrink-0"
+                         style={{ zIndex: hoveredCard === 'direct' ? 50 : 1 }}
+                         onMouseEnter={() => setHoveredCard('direct')}
+                         onMouseLeave={() => setHoveredCard(null)}>
+                      <div className={`absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full blur-md md:blur-lg transition-opacity duration-500 ${
+                        hoveredCard === 'direct' ? 'opacity-100' : 'opacity-50'
+                      }`}></div>
+                      <div className={`relative bg-white rounded-full w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 flex items-center justify-center border-2 md:border-3 lg:border-4 shadow-lg md:shadow-xl transition-all duration-500 ${
+                        hoveredCard === 'direct' 
+                          ? 'scale-125 md:scale-150 border-yellow-400 shadow-xl md:shadow-2xl shadow-amber-500/60 border-amber-500' 
+                          : 'scale-100 border-amber-500'
+                      }`}>
+                        <div className="text-center">
+                          <div className={`font-bold text-slate-900 transition-all duration-500 ${
+                            hoveredCard === 'direct' ? 'text-lg md:text-xl lg:text-2xl xl:text-3xl' : 'text-sm md:text-base lg:text-xl'
+                          }`}>
+                            DIRECT
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                    
                     {directLevels.map((level, index) => (
                       <React.Fragment key={index}>
+                        <div className="w-4 h-1 md:w-6 md:h-1.5 lg:w-8 lg:h-2 bg-gradient-to-r from-amber-400 to-yellow-500 flex-shrink-0 z-0"></div>
                         <div 
                           className="relative group cursor-pointer flex-shrink-0"
                           style={{ zIndex: hoveredCard === index ? 50 : 1 }}
@@ -826,23 +848,31 @@ const CCACoins = () => {
                             </div>
                           </div>
                         </div>
-                        {index < directLevels.length - 1 && (
-                          <div className="w-4 h-1 md:w-6 md:h-1.5 lg:w-8 lg:h-2 bg-gradient-to-r from-amber-400 to-yellow-500 flex-shrink-0 z-0"></div>
-                        )}
                       </React.Fragment>
                     ))}
+                    {/* Final CCA coins block - Changed to circle */}
+                    <div className="w-4 h-1 md:w-6 md:h-1.5 lg:w-8 lg:h-2 bg-gradient-to-r from-amber-400 to-yellow-500 flex-shrink-0 z-0"></div>
                     <div 
-                      className="bg-gradient-to-br from-yellow-500 to-amber-600 rounded-lg md:rounded-xl px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-5 shadow-xl md:shadow-2xl animate-pulse cursor-pointer transition-all duration-500 flex-shrink-0"
+                      className="relative group cursor-pointer flex-shrink-0"
                       style={{ zIndex: hoveredCard === 'final' ? 50 : 1 }}
                       onMouseEnter={() => setHoveredCard('final')}
                       onMouseLeave={() => setHoveredCard(null)}
                     >
-                      <span className={`font-black text-slate-900 transition-all duration-500 block ${
-                        hoveredCard === 'final' ? 'text-2xl md:text-3xl lg:text-4xl xl:text-5xl scale-125 md:scale-150' : 'text-lg md:text-xl lg:text-2xl xl:text-3xl'
-                      }`}>5%</span>
-                      <span className={`font-semibold text-slate-900 transition-all duration-500 block ${
-                        hoveredCard === 'final' ? 'text-xs md:text-sm lg:text-base' : 'text-xs md:text-xs lg:text-sm'
-                      }`}>CCA coins</span>
+                      <div className={`absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full blur-md md:blur-lg transition-opacity duration-500 ${
+                        hoveredCard === 'final' ? 'opacity-100' : 'opacity-50'
+                      }`}></div>
+                      <div className={`relative bg-gradient-to-br from-yellow-500 to-amber-600 rounded-full w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 flex flex-col items-center justify-center border-2 md:border-3 lg:border-4 shadow-xl md:shadow-2xl animate-pulse transition-all duration-500 ${
+                        hoveredCard === 'final' 
+                          ? 'scale-125 md:scale-150 border-yellow-400 shadow-2xl md:shadow-3xl shadow-amber-500/60 border-amber-500' 
+                          : 'scale-100 border-amber-500'
+                      }`}>
+                        <span className={`font-black text-slate-900 transition-all duration-500 block ${
+                          hoveredCard === 'final' ? 'text-base md:text-lg lg:text-xl xl:text-2xl' : 'text-sm md:text-base lg:text-lg'
+                        }`}>CCA</span>
+                        <span className={`font-semibold text-slate-900 transition-all duration-500 block ${
+                          hoveredCard === 'final' ? 'text-xs md:text-sm' : 'text-xs md:text-xs'
+                        }`}>coins</span>
+                      </div>
                     </div>
                   </div>
                   <div className="text-amber-400 font-bold text-lg md:text-xl lg:text-2xl xl:text-3xl mt-4 md:mt-6 lg:mt-8 animate-bounce">
@@ -1036,7 +1066,7 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 4 - Bitcoin Halving */}
+          {/* Slide 4 - Bitcoin Halving - UPDATED ANIMATION */}
           <div className="min-w-full h-full flex items-center justify-center px-4 md:px-6 lg:px-8 py-4 overflow-hidden">
             <div className="w-full max-w-7xl h-full flex flex-col">
               <div className="flex items-center justify-center gap-1 md:gap-2 mb-2 md:mb-3">
@@ -1062,47 +1092,60 @@ const CCACoins = () => {
                       </p>
                     </div>
 
-                    <div className="flex-1 flex flex-col justify-center space-y-1 md:space-y-1.5 lg:space-y-2 overflow-y-auto px-1 md:px-2">
-                      {halvingData.map((item, index) => (
-                        <div
-                          key={item.year}
-                          className={`transform transition-all duration-700 ${
-                            index < visibleItems
-                              ? 'opacity-100 translate-y-0 scale-100'
-                              : 'opacity-0 translate-y-4 md:translate-y-8 scale-95'
-                          }`}
-                        >
-                          <div className="relative group">
-                            <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-lg blur-sm opacity-40 group-hover:opacity-60 transition-all duration-500"></div>
-                            
-                            <div className="relative bg-gradient-to-br from-slate-800/70 to-slate-900/70 backdrop-blur-md rounded-lg p-1.5 md:p-2 lg:p-2.5 border-2 border-amber-500/50 hover:border-amber-400/70 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30">
-                              <div className="flex items-center gap-1.5 md:gap-2 lg:gap-2.5">
-                                <div className="flex-shrink-0">
-                                  <div className="bg-gradient-to-r from-amber-600 to-yellow-600 px-2 py-0.5 md:px-2.5 md:py-1 lg:px-3 lg:py-1 rounded-md border-2 border-amber-400/50 shadow-lg">
-                                    <span className="text-base md:text-lg lg:text-xl font-bold text-slate-900 whitespace-nowrap">
-                                      {item.year}
-                                    </span>
+                    <div className="flex-1 flex flex-col justify-center items-center space-y-1 md:space-y-1.5 lg:space-y-2 overflow-y-auto px-1 md:px-2">
+                      {halvingData.map((item, index) => {
+                        const isVisible = index < visibleItems;
+                        const isPrevious = index < visibleItems - 1;
+                        const isCurrent = index === visibleItems - 1;
+                        const isNext = index === visibleItems;
+                        
+                        return (
+                          <div
+                            key={item.year}
+                            className={`w-full max-w-md transform transition-all duration-700 ${
+                              isVisible
+                                ? isCurrent
+                                  ? 'opacity-100 translate-y-0 scale-100'
+                                  : 'opacity-70 -translate-y-4 md:-translate-y-6 scale-95'
+                                : 'opacity-0 translate-y-4 md:translate-y-8 scale-95'
+                            }`}
+                            style={{
+                              zIndex: isCurrent ? 50 : isPrevious ? 40 : 30,
+                              position: 'relative'
+                            }}
+                          >
+                            <div className="relative group">
+                              <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-lg blur-sm opacity-40 group-hover:opacity-60 transition-all duration-500"></div>
+                              
+                              <div className="relative bg-gradient-to-br from-slate-800/70 to-slate-900/70 backdrop-blur-md rounded-lg p-1.5 md:p-2 lg:p-2.5 border-2 border-amber-500/50 hover:border-amber-400/70 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30">
+                                <div className="flex items-center gap-1.5 md:gap-2 lg:gap-2.5">
+                                  <div className="flex-shrink-0">
+                                    <div className="bg-gradient-to-r from-amber-600 to-yellow-600 px-2 py-0.5 md:px-2.5 md:py-1 lg:px-3 lg:py-1 rounded-md border-2 border-amber-400/50 shadow-lg">
+                                      <span className="text-base md:text-lg lg:text-xl font-bold text-slate-900 whitespace-nowrap">
+                                        {item.year}
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
 
-                                <div className="flex-shrink-0">
-                                  <svg className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                  </svg>
-                                </div>
+                                  <div className="flex-shrink-0">
+                                    <svg className="w-3 h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                  </div>
 
-                                <div className="flex-1 min-w-0">
-                                  <div className="bg-gradient-to-r from-yellow-600/30 to-amber-600/30 backdrop-blur-sm px-2 py-1 md:px-2.5 md:py-1.5 lg:px-3 lg:py-2 rounded-md border-2 border-yellow-400/50 text-center shadow-lg">
-                                    <span className="text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tracking-wide">
-                                      {item.btc}
-                                    </span>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="bg-gradient-to-r from-yellow-600/30 to-amber-600/30 backdrop-blur-sm px-2 py-1 md:px-2.5 md:py-1.5 lg:px-3 lg:py-2 rounded-md border-2 border-yellow-400/50 text-center shadow-lg">
+                                      <span className="text-lg md:text-xl lg:text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent tracking-wide">
+                                        {item.btc}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ) : (
