@@ -657,7 +657,7 @@ const CCACoins = () => {
     }
   }, [currentSlide, bitcoinSlide]);
 
-  const audioFile = '/audio/Inspiring and Uplifting Background Music For Videos & Presentations.mp3';
+  const audioFile = '/audio/relax.mp3';
   const logoPath = '/audio/logo.png';
   // Bitcoin image path for BRC 20
   const bitcoinImagePath = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png';
