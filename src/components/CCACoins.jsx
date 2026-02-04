@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  TrendingUp, 
-  Coins,
-  Sparkles,
-  Shield,
-  Zap,
-  Activity,
-  Database,
+  DollarSign, // DCA
+  TrendingUp, // CCA
+  Gem, // FSC
+  Brain, // SIP
+  Newspaper, // News & Updates
+  Calendar, // Events
+  Bitcoin, // Halving
   ChevronLeft,
   ChevronRight,
   Volume2,
@@ -17,33 +17,21 @@ import {
   Cpu,
   Network,
   Globe2,
-  Gem,
+  Sparkles,
   Lock,
-  DollarSign,
   Server,
   Play,
   Pause,
-  SkipBack,
-  SkipForward,
   Home,
   BarChart3,
   Target,
   Cpu as CpuIcon,
-  Bitcoin,
   CheckCircle,
-  Layers,
-  GitBranch,
-  GitMerge,
-  Grid,
-  List,
-  LayoutGrid,
-  SquareStack,
-  GitCompare,
-  ArrowLeftRight,
-  RotateCcw,
-  Smartphone,
-  Tablet,
-  Monitor
+  Activity,
+  Zap,
+  Database,
+  Shield,
+  Coins
 } from 'lucide-react';
 
 const CCACoins = () => {
@@ -102,16 +90,16 @@ const CCACoins = () => {
 
   const strategies = [
     { 
-      icon: TrendingUp, 
+      icon: DollarSign, // Coin icon for DCA
       title: 'DCA', 
       subtitle: '(Dollar Cost Averaging)',
       color: 'from-amber-400 to-yellow-600',
       description: 'Systematically invest fixed amounts over time to reduce market timing risk.',
       detailPoints: ['Minimize timing risk', 'Consistent investing', 'Long-term growth'],
-      autoPlayTime: 5000 // 5 seconds per strategy
+      autoPlayTime: 5000
     },
     { 
-      icon: Coins, 
+      icon: TrendingUp, // Coin/Chart icon for CCA
       title: 'CCA', 
       subtitle: '(Coin Cost Averaging)',
       color: 'from-yellow-500 to-amber-700',
@@ -120,7 +108,7 @@ const CCACoins = () => {
       autoPlayTime: 5000
     },
     { 
-      icon: Shield, 
+      icon: Gem, // Gem/Strong coin icon for FSC
       title: 'FSC', 
       subtitle: '(Fundamental Strong Coin)',
       color: 'from-amber-500 to-orange-600',
@@ -129,7 +117,7 @@ const CCACoins = () => {
       autoPlayTime: 5000
     },
     { 
-      icon: Sparkles, 
+      icon: Brain, // Brain/AI icon for SIP
       title: 'SIP', 
       subtitle: '(Smart Investment Plan)',
       color: 'from-yellow-400 to-amber-600',
@@ -138,7 +126,7 @@ const CCACoins = () => {
       autoPlayTime: 5000
     },
     { 
-      icon: Activity, 
+      icon: Newspaper, // Newspaper icon for News & Updates
       title: 'News & Updates', 
       subtitle: '',
       color: 'from-amber-400 to-yellow-500',
@@ -147,7 +135,7 @@ const CCACoins = () => {
       autoPlayTime: 5000
     },
     { 
-      icon: Zap, 
+      icon: Calendar, // Calendar icon for Events
       title: 'Events', 
       subtitle: '',
       color: 'from-yellow-500 to-amber-600',
@@ -156,7 +144,7 @@ const CCACoins = () => {
       autoPlayTime: 5000
     },
     { 
-      icon: Database, 
+      icon: Bitcoin, // Bitcoin icon for Halving
       title: 'Halving', 
       subtitle: '',
       color: 'from-amber-500 to-yellow-700',
@@ -192,7 +180,7 @@ const CCACoins = () => {
       autoPlayTime: 5000
     },
     {
-      icon: Gem,
+      icon: Sparkles,
       name: 'NFT',
       coins: 'GMT coin, APT coin, APE coin, Near Protocol, AXS coin, CHZ coin, ZORA',
       gradient: 'from-pink-500 to-pink-700',
@@ -216,7 +204,7 @@ const CCACoins = () => {
       autoPlayTime: 5000
     },
     {
-      icon: Sparkles,
+      icon: Gem,
       name: 'Meme Coin',
       coins: 'Doge, Shib, Pepe, Baby Dole, Akita, Ploti, kishu inu',
       gradient: 'from-yellow-400 to-orange-500',
@@ -224,7 +212,7 @@ const CCACoins = () => {
       autoPlayTime: 5000
     },
     {
-      icon: Database,
+      icon: Bitcoin,
       name: 'BRC 20',
       coins: 'Pepe, Diorydi, Saints, Rats, MultiBit, ORD',
       gradient: 'from-orange-500 to-orange-700',
@@ -316,7 +304,6 @@ const CCACoins = () => {
     setTimeout(() => {
       setStrategySlide((prev) => {
         const next = (prev + 1) % strategies.length;
-        // If we're at the last strategy, mark animation as complete
         if (next === 0) {
           setIsChildAnimationComplete(true);
         }
@@ -339,7 +326,6 @@ const CCACoins = () => {
     setTimeout(() => {
       setTechSlide((prev) => {
         const next = (prev + 1) % technologies.length;
-        // If we're at the last technology, mark animation as complete
         if (next === 0) {
           setIsChildAnimationComplete(true);
         }
@@ -380,7 +366,6 @@ const CCACoins = () => {
         setVisibleItems(prev => {
           const newValue = prev + 1;
           if (newValue >= halvingData.length) {
-            // If we've shown all items, mark as complete
             setIsChildAnimationComplete(true);
           }
           return newValue;
@@ -394,7 +379,6 @@ const CCACoins = () => {
         setVisibleNodes(prev => {
           const newValue = prev + 1;
           if (newValue >= nodes.length) {
-            // If we've shown all nodes, mark as complete
             setIsChildAnimationComplete(true);
           }
           return newValue;
@@ -453,38 +437,29 @@ const CCACoins = () => {
   const toggleChildAutoPlay = () => {
     const newChildPlayingState = !childAutoPlaying;
     setChildAutoPlaying(newChildPlayingState);
-    // When starting child auto play, reset completion flag
     if (newChildPlayingState) {
       setIsChildAnimationComplete(false);
     }
   };
 
-  // Main auto play logic - FIXED
+  // Main auto play logic
   useEffect(() => {
     if (isPlaying) {
       autoPlayTimerRef.current = setInterval(() => {
-        // Check if we're on a slide with child nav
         const currentSlideData = slides[currentSlide];
         
         if (currentSlideData.hasChildNav) {
-          // If slide has child content and child autoplay is on
           if (childAutoPlaying) {
-            // Child autoplay is active, wait for it to complete
             if (isChildAnimationComplete) {
-              // Child animation is complete, move to next slide
               nextSlide();
             }
-            // If child animation not complete, do nothing (wait)
           } else {
-            // Slide has child content but child autoplay is off
-            // Move to next slide after main slide duration
             nextSlide();
           }
         } else {
-          // Slide doesn't have child content, move to next slide
           nextSlide();
         }
-      }, 15000); // 15 seconds per main slide
+      }, 15000);
     } else if (autoPlayTimerRef.current) {
       clearInterval(autoPlayTimerRef.current);
     }
@@ -501,7 +476,6 @@ const CCACoins = () => {
     const currentSlideData = slides[currentSlide];
     
     if (currentSlideData.hasChildNav && isPlaying) {
-      // Reset child animation completion when entering child slide
       setIsChildAnimationComplete(false);
       
       const timeout = setTimeout(() => {
@@ -517,15 +491,12 @@ const CCACoins = () => {
   // Child auto play logic for Strategies
   useEffect(() => {
     if (childAutoPlaying && currentSlide === 2) {
-      // Clear any existing timers
       if (strategyCompletionTimerRef.current) {
         clearTimeout(strategyCompletionTimerRef.current);
       }
       
-      // Show current strategy for its duration
       const currentStrategy = strategies[strategySlide];
       strategyCompletionTimerRef.current = setTimeout(() => {
-        // Move to next strategy after completion time
         nextStrategy();
       }, currentStrategy.autoPlayTime);
 
@@ -540,15 +511,12 @@ const CCACoins = () => {
   // Child auto play logic for Technologies
   useEffect(() => {
     if (childAutoPlaying && currentSlide === 3) {
-      // Clear any existing timers
       if (techCompletionTimerRef.current) {
         clearTimeout(techCompletionTimerRef.current);
       }
       
-      // Show current technology for its duration
       const currentTech = technologies[techSlide];
       techCompletionTimerRef.current = setTimeout(() => {
-        // Move to next technology after completion time
         nextTech();
       }, currentTech.autoPlayTime);
 
@@ -560,10 +528,9 @@ const CCACoins = () => {
     }
   }, [childAutoPlaying, currentSlide, techSlide]);
 
-  // Child auto play logic for Bitcoin Halving - FIXED
+  // Child auto play logic for Bitcoin Halving
   useEffect(() => {
     if (childAutoPlaying && currentSlide === 4) {
-      // Clear any existing timers
       if (childAutoPlayTimerRef.current) {
         clearInterval(childAutoPlayTimerRef.current);
       }
@@ -572,17 +539,13 @@ const CCACoins = () => {
       }
 
       if (bitcoinSlide === 0) {
-        // Auto play halving chart
         if (visibleItems < halvingData.length) {
-          // Animate chart step by step
           childAutoPlayTimerRef.current = setInterval(() => {
             setVisibleItems(prev => {
               if (prev < halvingData.length) {
                 const newValue = prev + 1;
                 if (newValue >= halvingData.length) {
-                  // Chart complete
                   clearInterval(childAutoPlayTimerRef.current);
-                  // Wait 3 seconds after completion, then move to graph
                   bitcoinCompletionTimerRef.current = setTimeout(() => {
                     nextBitcoinSlide();
                   }, 3000);
@@ -591,29 +554,23 @@ const CCACoins = () => {
               }
               return prev;
             });
-          }, 1000); // 1 second between items
+          }, 1000);
         } else {
-          // Chart already complete, wait then move to graph
           bitcoinCompletionTimerRef.current = setTimeout(() => {
             nextBitcoinSlide();
           }, 3000);
         }
       } else if (bitcoinSlide === 1) {
-        // Auto play graph
         if (visibleNodes < nodes.length) {
-          // Animate graph step by step
           childAutoPlayTimerRef.current = setInterval(() => {
             setVisibleNodes(prev => {
               if (prev < nodes.length) {
                 const newValue = prev + 1;
                 if (newValue >= nodes.length) {
-                  // Graph complete
                   clearInterval(childAutoPlayTimerRef.current);
-                  // Wait 3 seconds after completion, then cycle back to chart
                   bitcoinCompletionTimerRef.current = setTimeout(() => {
                     setVisibleNodes(0);
                     nextBitcoinSlide();
-                    // After cycling through both views, mark as complete
                     setIsChildAnimationComplete(true);
                   }, 3000);
                 }
@@ -621,13 +578,11 @@ const CCACoins = () => {
               }
               return prev;
             });
-          }, 600); // 0.6 seconds between nodes
+          }, 600);
         } else {
-          // Graph already complete, wait then cycle back to chart
           bitcoinCompletionTimerRef.current = setTimeout(() => {
             setVisibleNodes(0);
             nextBitcoinSlide();
-            // After cycling through both views, mark as complete
             setIsChildAnimationComplete(true);
           }, 3000);
         }
@@ -659,7 +614,6 @@ const CCACoins = () => {
 
   const audioFile = '/audio/relax.mp3';
   const logoPath = '/audio/logo.png';
-  // Bitcoin image path for BRC 20
   const bitcoinImagePath = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png';
 
   const getSlideTextSize = () => {
@@ -775,7 +729,7 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 1 - Investment Flow - CHANGED TO CIRCLES */}
+          {/* Slide 1 - Investment Flow - CIRCLES */}
           <div className="min-w-full h-full flex items-center justify-center px-4 md:px-6 lg:px-8 py-4 md:py-6">
             <div className="w-full max-w-5xl">
               <div className="text-center animate-fade-in">
@@ -799,7 +753,7 @@ const CCACoins = () => {
 
                 <div className="max-w-4xl mx-auto px-2">
                   <div className="flex items-center justify-center gap-2 md:gap-4 lg:gap-6 flex-wrap relative">
-                    {/* DIRECT Label - Changed to circle */}
+                    {/* DIRECT Label */}
                     <div className="relative group cursor-pointer flex-shrink-0"
                          style={{ zIndex: hoveredCard === 'direct' ? 50 : 1 }}
                          onMouseEnter={() => setHoveredCard('direct')}
@@ -850,7 +804,7 @@ const CCACoins = () => {
                         </div>
                       </React.Fragment>
                     ))}
-                    {/* Final CCA coins block - Changed to circle */}
+                    {/* Final CCA coins block */}
                     <div className="w-4 h-1 md:w-6 md:h-1.5 lg:w-8 lg:h-2 bg-gradient-to-r from-amber-400 to-yellow-500 flex-shrink-0 z-0"></div>
                     <div 
                       className="relative group cursor-pointer flex-shrink-0"
@@ -977,7 +931,7 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 3 - Technologies - WITH BITCOIN IMAGE FOR BRC 20 */}
+          {/* Slide 3 - Technologies */}
           <div className="min-w-full h-full flex flex-col px-2 md:px-4 lg:px-6 py-2 md:py-4 overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/10 via-slate-900/20 to-blue-900/10 backdrop-blur-sm pointer-events-none"></div>
             
@@ -1066,7 +1020,7 @@ const CCACoins = () => {
             </div>
           </div>
 
-          {/* Slide 4 - Bitcoin Halving - UPDATED ANIMATION */}
+          {/* Slide 4 - Bitcoin Halving */}
           <div className="min-w-full h-full flex items-center justify-center px-4 md:px-6 lg:px-8 py-4 overflow-hidden">
             <div className="w-full max-w-7xl h-full flex flex-col">
               <div className="flex items-center justify-center gap-1 md:gap-2 mb-2 md:mb-3">
@@ -1097,7 +1051,6 @@ const CCACoins = () => {
                         const isVisible = index < visibleItems;
                         const isPrevious = index < visibleItems - 1;
                         const isCurrent = index === visibleItems - 1;
-                        const isNext = index === visibleItems;
                         
                         return (
                           <div
@@ -1295,7 +1248,7 @@ const CCACoins = () => {
       {/* VLC Style Control Panel - Fixed at Bottom */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-slate-900/95 to-slate-800/95 backdrop-blur-lg border-t border-slate-700/50 shadow-2xl">
         <div className="container mx-auto px-2 md:px-3 lg:px-4">
-          {/* Child Navigation Panel - Shows only for slides with child content */}
+          {/* Child Navigation Panel */}
           {slides[currentSlide].hasChildNav && (
             <div className="py-1 md:py-1.5 lg:py-2 border-b border-slate-600/50">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
@@ -1740,24 +1693,6 @@ const CCACoins = () => {
           }
         }
 
-        @keyframes orbit-3 {
-          0% {
-            transform: translate(-50%, -50%) rotate(90deg) translateX(150px) rotate(-90deg);
-          }
-          100% {
-            transform: translate(-50%, -50%) rotate(450deg) translateX(150px) rotate(-450deg);
-          }
-        }
-
-        @keyframes orbit-4 {
-          0% {
-            transform: translate(-50%, -50%) rotate(270deg) translateX(150px) rotate(-270deg);
-          }
-          100% {
-            transform: translate(-50%, -50%) rotate(630deg) translateX(150px) rotate(-630deg);
-          }
-        }
-
         @keyframes slide-in-left {
           0% {
             transform: translateX(-100px);
@@ -1854,14 +1789,6 @@ const CCACoins = () => {
 
         .animate-orbit-2 {
           animation: orbit-2 10s linear infinite;
-        }
-
-        .animate-orbit-3 {
-          animation: orbit-3 7s linear infinite;
-        }
-
-        .animate-orbit-4 {
-          animation: orbit-4 9s linear infinite;
         }
 
         .animate-slide-in-left {
