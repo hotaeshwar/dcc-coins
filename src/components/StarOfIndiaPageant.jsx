@@ -418,89 +418,88 @@ const StarOfIndiaPageant = () => {
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {/* SLIDE 0: INTRO / TITLE */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-10 overflow-hidden">
-            <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-center my-auto">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
+            <div className="w-full max-w-4xl relative z-10 text-center space-y-2 sm:space-y-2.5 my-auto">
               
-              {/* Left Column: Kicker, Title, Quote, Stats & Buttons */}
-              <div className="lg:col-span-7 text-left space-y-2.5 sm:space-y-3.5">
-                {/* Regal Presenter Kicker */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-400/50 text-[9px] sm:text-xs font-black uppercase tracking-[0.2em] text-amber-900 shadow-sm">
+              {/* Regal Presenter Kicker */}
+              <div className="flex items-center justify-center gap-2 sm:gap-3">
+                <div className="h-px w-8 sm:w-12 bg-gradient-to-r from-transparent via-amber-400 to-amber-600" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 sm:py-1 rounded-full bg-amber-500/10 border border-amber-400/50 text-[9px] sm:text-xs font-black uppercase tracking-[0.2em] text-amber-900 shadow-sm">
                   <Crown className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
                   BE STAR ENTERTAINMENT PRESENTS
+                  <Crown className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
                 </div>
+                <div className="h-px w-8 sm:w-12 bg-gradient-to-l from-transparent via-amber-400 to-amber-600" />
+              </div>
 
-                <div>
-                  <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-serif-luxury tracking-tight leading-none text-slate-950">
-                    MISS • MRS • CURVY <br />
-                    <span className="text-gold-gradient">STAR OF INDIA</span>
-                  </h1>
-                  <div className="mt-1 text-xs sm:text-sm font-black uppercase tracking-[0.25em] text-amber-800">
-                    Season 1 — 2026 • Premier National Pageant
-                  </div>
-                </div>
-
-                <div className="border-l-3 sm:border-l-4 border-amber-500 pl-3 py-0.5">
-                  <p className="text-xs sm:text-base md:text-lg font-editorial italic font-bold text-slate-800">
-                    "Beauty Has No Size, No Age, No Limits."
-                  </p>
-                </div>
-
-                {/* Interactive Stats Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                  {[
-                    { id: 'stat-1', num: '10+ Cities', label: 'Audition Tour' },
-                    { id: 'stat-2', num: '1000+', label: 'Participants' },
-                    { id: 'stat-3', num: '3 Divisions', label: 'Miss • Mrs • Curvy' },
-                    { id: 'stat-4', num: '₹25L+', label: 'Brand Value' }
-                  ].map((st) => (
-                    <div 
-                      key={st.id}
-                      className="p-2 rounded-xl bg-white/95 border border-amber-200/90 text-center shadow-sm zoom-card cursor-pointer"
-                    >
-                      <div className="text-sm sm:text-base font-black text-amber-700">{st.num}</div>
-                      <div className="text-[9px] text-slate-800 uppercase font-black tracking-wide">{st.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Intro Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2.5 pt-1.5">
-                  <button
-                    onClick={() => setShowRegModal(true)}
-                    className="px-5 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-black text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Sparkles className="w-4 h-4" /> Apply For Auditions
-                  </button>
-                  <button
-                    onClick={nextSlide}
-                    className="px-5 py-2 sm:py-2.5 rounded-full bg-slate-900 text-white font-black text-xs hover:bg-slate-800 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
-                  >
-                    <span>Explore Presentation</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+              <div>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black font-serif-luxury tracking-tight leading-tight text-slate-950">
+                  MISS • MRS • CURVY <br />
+                  <span className="text-gold-gradient">STAR OF INDIA</span>
+                </h1>
+                <div className="mt-0.5 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-[0.25em] text-amber-800">
+                  Season 1 — 2026
                 </div>
               </div>
 
-              {/* Right Column: Majestic Cardless Un-squeezed Runway Hero Image */}
-              <div className="lg:col-span-5 flex justify-center">
-                <div 
-                  onMouseEnter={() => setHoveredCard('hero-runway')}
-                  onMouseLeave={() => setHoveredCard(null)}
-                  className="w-full max-w-sm sm:max-w-md lg:max-w-none rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.22)] hover:shadow-[0_25px_60px_rgba(217,119,6,0.35)] transition-all duration-500 ease-out group cursor-pointer relative"
+              <div className="max-w-xl mx-auto border-l-3 sm:border-l-4 border-amber-500 pl-3 py-0.5 text-left sm:text-center">
+                <p className="text-xs sm:text-base font-editorial italic font-bold text-slate-800">
+                  "Beauty Has No Size, No Age, No Limits."
+                </p>
+              </div>
+
+              {/* Cardless Grand Runway Hero Image - Uncropped Exact 16:9 Aspect Ratio */}
+              <div 
+                onMouseEnter={() => setHoveredCard('hero-runway')}
+                onMouseLeave={() => setHoveredCard(null)}
+                className="w-full max-w-lg sm:max-w-xl md:max-w-2xl mx-auto rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.22)] hover:shadow-[0_20px_50px_rgba(217,119,6,0.35)] transition-all duration-500 ease-out group cursor-pointer relative"
+              >
+                <img
+                  src="/images/runway-hero.jpg"
+                  alt="Star of India Runway"
+                  className="w-full aspect-video max-h-[30vh] sm:max-h-[34vh] md:max-h-[36vh] object-cover object-top rounded-2xl sm:rounded-3xl transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none rounded-2xl sm:rounded-3xl" />
+                <div className="absolute bottom-2 inset-x-4 flex items-center justify-between text-white/95 text-[9px] sm:text-xs font-bold tracking-wider uppercase px-1 pointer-events-none">
+                  <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-amber-400" /> Grand National Runway</span>
+                  <span className="text-amber-300 font-serif-luxury font-black">Season 1 — 2026</span>
+                </div>
+              </div>
+
+              {/* Interactive Stats Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 max-w-2xl sm:max-w-3xl mx-auto pt-0.5">
+                {[
+                  { id: 'stat-1', num: '10+ Cities', label: 'Audition Tour' },
+                  { id: 'stat-2', num: '1000+', label: 'Participants' },
+                  { id: 'stat-3', num: '3 Categories', label: 'Miss • Mrs • Curvy' },
+                  { id: 'stat-4', num: '₹25L+', label: 'Brand Value' }
+                ].map((st) => (
+                  <div 
+                    key={st.id}
+                    className="p-1.5 sm:p-2 rounded-xl bg-white/95 border border-amber-200/90 text-center shadow-sm zoom-card cursor-pointer"
+                  >
+                    <div className="text-xs sm:text-sm md:text-base font-black text-amber-700">{st.num}</div>
+                    <div className="text-[8.5px] sm:text-[10px] text-slate-800 uppercase font-black tracking-wide">{st.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Intro Action Buttons */}
+              <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 pt-0.5">
+                <button
+                  onClick={() => setShowRegModal(true)}
+                  className="px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
-                  <img
-                    src="/images/runway-hero.jpg"
-                    alt="Star of India Runway"
-                    className="w-full h-52 sm:h-64 md:h-72 lg:h-[350px] object-cover object-center rounded-2xl sm:rounded-3xl transform group-hover:scale-105 transition-transform duration-700 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none rounded-2xl sm:rounded-3xl" />
-                  <div className="absolute bottom-3 inset-x-3 flex items-center justify-between text-white/95 text-[10px] sm:text-xs font-bold tracking-wider uppercase px-2 pointer-events-none">
-                    <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-amber-400" /> Grand National Runway</span>
-                    <span className="text-amber-300 font-serif-luxury font-black">Season 1 — 2026</span>
-                  </div>
-                </div>
+                  <Sparkles className="w-3.5 h-3.5" /> Apply For Auditions
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-slate-900 text-white font-black text-[10px] sm:text-xs hover:bg-slate-800 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <span>Explore Presentation</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
-
             </div>
           </div>
 
