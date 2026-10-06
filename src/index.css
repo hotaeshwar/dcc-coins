@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-cinzel: 'Cinzel', serif;
+    --font-playfair: 'Playfair Display', serif;
+    --font-sans: 'Plus Jakarta Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #f8f7f2;
+    color: #0f172a;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-serif-luxury {
+    font-family: var(--font-cinzel);
+  }
+
+  .font-editorial {
+    font-family: var(--font-playfair);
+  }
+}
+
+/* Luxury Gold and Dark Gradients */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #92400e 0%, #b45309 30%, #d97706 60%, #b45309 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gold-bright {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 40%, #f59e0b 70%, #b45309 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #f59e0b 100%);
+}
+
+.card-luxury {
+  background: #ffffff;
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+}
+
+.card-luxury:hover {
+  border-color: rgba(217, 119, 6, 0.6);
+  box-shadow: 0 20px 25px -5px rgba(217, 119, 6, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Card Zoom In on Hover / Zoom Out on Remove (100% scale return) */
+.zoom-card {
+  transform: scale(1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  will-change: transform;
+}
+
+.zoom-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 20px 30px -10px rgba(217, 119, 6, 0.22), 0 10px 15px -5px rgba(0, 0, 0, 0.08);
+  border-color: #d97706 !important;
+  z-index: 30;
+  position: relative;
+}
+
+.zoom-card-lg {
+  transform: scale(1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  will-change: transform;
+}
+
+.zoom-card-lg:hover {
+  transform: scale(1.08);
+  box-shadow: 0 25px 35px -10px rgba(217, 119, 6, 0.25), 0 15px 20px -5px rgba(0, 0, 0, 0.1);
+  border-color: #d97706 !important;
+  z-index: 30;
+  position: relative;
+}
+
+/* Luxury Shimmer & Aura Effects */
+@keyframes goldShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-gold-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(245,158,11,0.25) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: goldShimmer 3.5s infinite;
+}
+
+@keyframes goldPulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px -2px rgba(217, 119, 6, 0.25), 0 4px 15px rgba(0, 0, 0, 0.04);
+  }
+  50% {
+    box-shadow: 0 0 25px 3px rgba(245, 158, 11, 0.45), 0 8px 25px rgba(217, 119, 6, 0.15);
+  }
+}
+
+.luxury-brand-badge {
+  animation: goldPulseGlow 4s infinite ease-in-out;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luxury-brand-badge:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 30px 6px rgba(245, 158, 11, 0.55), 0 12px 30px rgba(217, 119, 6, 0.2);
+}
+
+@keyframes bgGentleZoom {
+  0%, 100% {
+    transform: scale(1.02);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.animate-bg-ambient {
+  animation: bgGentleZoom 24s infinite ease-in-out;
+}
+
+
+
