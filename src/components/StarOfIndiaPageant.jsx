@@ -412,38 +412,38 @@ const StarOfIndiaPageant = () => {
       </header>
 
       {/* Main Slide Carousel Container */}
-      <div className="relative z-10 h-screen overflow-hidden pb-16 sm:pb-20 md:pb-24">
+      <div className="relative z-10 h-screen w-full overflow-hidden pt-12 sm:pt-14 pb-14 sm:pb-16 flex flex-col">
         <div
-          className="flex h-full transition-transform duration-700 ease-in-out"
+          className="flex h-full w-full transition-transform duration-700 ease-in-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {/* SLIDE 0: INTRO / TITLE */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-3 sm:px-6 lg:px-8 pt-14 sm:pt-16 md:pt-14 pb-14 sm:pb-16 md:pb-16 overflow-hidden">
-            <div className="w-full max-w-4xl relative z-10 text-center space-y-2 sm:space-y-2.5 my-auto">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-3 sm:px-6 lg:px-8 overflow-hidden">
+            <div className="w-full max-w-4xl relative z-10 text-center space-y-1.5 sm:space-y-2 my-auto">
               
               {/* Regal Presenter Kicker */}
               <div className="flex items-center justify-center gap-2 sm:gap-3">
-                <div className="h-px w-6 sm:w-12 bg-gradient-to-r from-transparent via-amber-400 to-amber-600" />
-                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 sm:py-1 rounded-full bg-amber-500/10 border border-amber-400/40 text-[9px] sm:text-xs font-black uppercase tracking-[0.25em] text-amber-900 shadow-sm">
+                <div className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent via-amber-400 to-amber-600" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-400/40 text-[8.5px] sm:text-[10.5px] font-black uppercase tracking-[0.2em] text-amber-900 shadow-sm">
                   <Crown className="w-3 h-3 text-amber-600 animate-pulse" />
                   BE STAR ENTERTAINMENT PRESENTS
                   <Crown className="w-3 h-3 text-amber-600 animate-pulse" />
                 </div>
-                <div className="h-px w-6 sm:w-12 bg-gradient-to-l from-transparent via-amber-400 to-amber-600" />
+                <div className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent via-amber-400 to-amber-600" />
               </div>
 
               <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black font-serif-luxury tracking-tight leading-tight text-slate-950">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black font-serif-luxury tracking-tight leading-tight text-slate-950">
                   MISS • MRS • CURVY <br />
                   <span className="text-gold-gradient">STAR OF INDIA</span>
                 </h1>
-                <div className="mt-0.5 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-[0.25em] text-amber-800">
+                <div className="mt-0.5 text-[10px] sm:text-xs font-black uppercase tracking-[0.25em] text-amber-800">
                   Season 1 — 2026
                 </div>
               </div>
 
               <div className="max-w-xl mx-auto border-l-3 sm:border-l-4 border-amber-500 pl-3 py-0.5 text-left sm:text-center">
-                <p className="text-xs sm:text-base md:text-lg font-editorial italic font-bold text-slate-800">
+                <p className="text-[11px] sm:text-xs md:text-sm font-editorial italic font-bold text-slate-800">
                   "Beauty Has No Size, No Age, No Limits."
                 </p>
               </div>
@@ -452,22 +452,22 @@ const StarOfIndiaPageant = () => {
               <div 
                 onMouseEnter={() => setHoveredCard('hero-runway')}
                 onMouseLeave={() => setHoveredCard(null)}
-                className="w-full max-w-lg sm:max-w-xl md:max-w-2xl mx-auto rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_45px_rgba(217,119,6,0.35)] transition-all duration-500 ease-out group cursor-pointer relative"
+                className="w-full max-w-md sm:max-w-lg md:max-w-xl mx-auto rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_12px_30px_rgba(0,0,0,0.18)] hover:shadow-[0_18px_40px_rgba(217,119,6,0.3)] transition-all duration-500 ease-out group cursor-pointer relative"
               >
                 <img
                   src="/images/runway-hero.jpg"
                   alt="Star of India Runway"
-                  className="w-full h-32 sm:h-40 md:h-44 lg:h-48 object-cover rounded-2xl sm:rounded-3xl transform group-hover:scale-105 transition-transform duration-700 ease-out"
+                  className="w-full h-20 sm:h-28 md:h-32 lg:h-36 max-h-[18vh] object-cover rounded-xl sm:rounded-2xl transform group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none rounded-2xl sm:rounded-3xl" />
-                <div className="absolute bottom-2 inset-x-4 flex items-center justify-between text-white/95 text-[9px] sm:text-xs font-bold tracking-wider uppercase px-2 pointer-events-none">
-                  <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-amber-400" /> Grand National Runway</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none rounded-xl sm:rounded-2xl" />
+                <div className="absolute bottom-1.5 inset-x-3 flex items-center justify-between text-white/95 text-[8.5px] sm:text-[10.5px] font-bold tracking-wider uppercase px-1 pointer-events-none">
+                  <span className="flex items-center gap-1"><Sparkles className="w-3 h-3 text-amber-400" /> Grand National Runway</span>
                   <span className="text-amber-300 font-serif-luxury font-black">Season 1 — 2026</span>
                 </div>
               </div>
 
               {/* Interactive Stats Bar */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-3xl mx-auto pt-0.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 max-w-2xl mx-auto pt-0.5">
                 {[
                   { id: 'stat-1', num: '10+ Cities', label: 'Audition Tour' },
                   { id: 'stat-2', num: '1000+', label: 'Participants' },
@@ -476,24 +476,25 @@ const StarOfIndiaPageant = () => {
                 ].map((st) => (
                   <div 
                     key={st.id}
-                    className="p-2 sm:p-2.5 rounded-xl bg-white/95 border border-amber-200/90 text-center shadow-sm zoom-card cursor-pointer"
+                    className="p-1 sm:p-1.5 rounded-lg bg-white/95 border border-amber-200/90 text-center shadow-sm zoom-card cursor-pointer"
                   >
-                    <div className="text-sm sm:text-base md:text-lg font-black text-amber-700">{st.num}</div>
-                    <div className="text-[9px] sm:text-[10.5px] text-slate-800 uppercase font-black tracking-wide">{st.label}</div>
+                    <div className="text-xs sm:text-sm md:text-base font-black text-amber-700">{st.num}</div>
+                    <div className="text-[8px] sm:text-[9.5px] text-slate-800 uppercase font-black tracking-wide">{st.label}</div>
                   </div>
                 ))}
               </div>
 
-              <div className="flex flex-wrap justify-center gap-2 pt-0.5">
+              {/* Intro Action Buttons */}
+              <div className="flex flex-wrap justify-center items-center gap-2 pt-1">
                 <button
                   onClick={() => setShowRegModal(true)}
-                  className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 hover:scale-105 transition-all flex items-center gap-1.5"
+                  className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-black font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Sparkles className="w-3.5 h-3.5" /> Apply For Auditions
                 </button>
                 <button
                   onClick={nextSlide}
-                  className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-slate-900 text-white font-black text-[10px] sm:text-xs hover:bg-slate-800 transition-all flex items-center gap-1.5 shadow-sm"
+                  className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-slate-900 text-white font-black text-[10px] sm:text-xs hover:bg-slate-800 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                 >
                   <span>Explore Presentation</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -503,7 +504,7 @@ const StarOfIndiaPageant = () => {
           </div>
 
           {/* SLIDE 1: VISION 2026 */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-14 sm:pb-16 overflow-hidden">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
             <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-center my-auto">
               <div className="lg:col-span-7 space-y-2.5 sm:space-y-3.5 text-left">
                 <div className="text-[10px] sm:text-xs uppercase tracking-widest text-amber-800 font-black">
@@ -577,7 +578,7 @@ const StarOfIndiaPageant = () => {
           </div>
 
           {/* SLIDE 2: CATEGORIES (AGE 18+ ABOVE) */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-14 sm:pb-16 overflow-hidden">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
             <div className="w-full max-w-5xl space-y-3 sm:space-y-4 text-center my-auto">
               <div>
                 <span className="text-[10px] sm:text-xs uppercase tracking-widest text-amber-800 font-black">Eligibility & Divisions</span>
@@ -663,7 +664,7 @@ const StarOfIndiaPageant = () => {
           </div>
 
           {/* SLIDE 3: CELEBRITY JUDGES */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-14 sm:pb-16 overflow-hidden">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
             <div className="w-full max-w-5xl space-y-2.5 sm:space-y-3 text-center my-auto">
               <div>
                 <span className="text-[10px] sm:text-xs uppercase tracking-widest text-amber-800 font-black">Star Power & Jury</span>
@@ -720,7 +721,7 @@ const StarOfIndiaPageant = () => {
           </div>
 
           {/* SLIDE 4: EVENT OVERVIEW & 4 PILLARS */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-14 sm:pb-16 overflow-hidden">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
             <div className="w-full max-w-5xl space-y-3 sm:space-y-4 text-center my-auto">
               <div>
                 <span className="text-[10px] sm:text-xs uppercase tracking-widest text-amber-800 font-black">Concept & Vision</span>
@@ -802,7 +803,7 @@ const StarOfIndiaPageant = () => {
           </div>
 
           {/* SLIDE 5: AUDITION PROCESS & 10 CITIES */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-14 sm:pb-16 overflow-hidden">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
             <div className="w-full max-w-5xl space-y-3 sm:space-y-4 text-center my-auto">
               <div>
                 <span className="text-[10px] sm:text-xs uppercase tracking-widest text-amber-800 font-black">Auditions & Tour</span>
@@ -873,7 +874,7 @@ const StarOfIndiaPageant = () => {
           </div>
 
           {/* SLIDE 6: CONTESTANT DELIVERABLES */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-14 sm:pb-16 overflow-hidden">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
             <div className="w-full max-w-5xl space-y-2.5 sm:space-y-3 my-auto">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-amber-300 pb-1.5">
                 <div>
@@ -972,7 +973,7 @@ const StarOfIndiaPageant = () => {
           </div>
 
           {/* SLIDE 7: WHY PARTNER WITH US & BRAND ROI */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-14 sm:pb-16 overflow-hidden">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
             <div className="w-full max-w-5xl space-y-3 sm:space-y-4 text-center my-auto">
               <div>
                 <span className="text-[10px] sm:text-xs uppercase tracking-widest text-amber-800 font-black">Brand Association</span>
@@ -1032,7 +1033,7 @@ const StarOfIndiaPageant = () => {
           </div>
 
           {/* SLIDE 8: SPONSORSHIP PLANS */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-14 sm:pb-16 overflow-hidden">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
             <div className="w-full max-w-5xl space-y-3 sm:space-y-4 text-center my-auto">
               <div>
                 <span className="text-[10px] sm:text-xs uppercase tracking-widest text-amber-800 font-black">Investment Packages</span>
@@ -1172,7 +1173,7 @@ const StarOfIndiaPageant = () => {
           </div>
 
           {/* SLIDE 9: THANK YOU & CONTACT INFORMATION */}
-          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-14 sm:pb-16 overflow-hidden">
+          <div className="min-w-full h-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 overflow-hidden">
             <div className="w-full max-w-4xl text-center space-y-2.5 sm:space-y-3.5 my-auto">
               <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-[10px] sm:text-xs font-black uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Join The Grand Movement
